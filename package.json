@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "postinstall": "tsc -p .",
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
     "sniff": "node ."
