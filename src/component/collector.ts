@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { join, dirname, basename } from 'path';
 import { IFile, getFile } from '../shared/file';
 
@@ -8,6 +9,7 @@ export enum EComponentType {
 }
 
 export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S extends IFile = IFile, T extends IFile = IFile> {
+    id: string
     namespace: string
     path: string
     name: string
@@ -31,6 +33,7 @@ export function getComponent(path: string): IComponent {
     const deprecated = getFile(join(path, 'DEPRECATED.md'));
 
     return {
+        id: createHash('md5').update(path).digest('hex'),
         namespace: 'SprykerShop',
         path,
         name,

@@ -10,28 +10,23 @@ export const printSuccessMark = (): void => console.log(green('\u2714'));
 export const printFailureMark = (): void => console.log(red('\u2718'));
 export const printWarningMark = (): void => console.log(yellow('\u2691'));
 
-export function indent(message: string, count: number = 1): string {
-    const indentation = (new Array(count * 2)).fill(' ').join('');
-    return `${indentation}${message}`;
-}
-
 export function printInfos(messages: string[] = []): void {
-    console.log(dim(indent('informations', 2)));
-    messages.forEach((message: string) => console.log(indent(dim(message), 3)));
+    console.log(dim('informations'));
+    messages.forEach((message: string) => console.log(dim(message)));
 }
 
 export function printWarnings(messages: string[] = []): void {
-    console.log(dim(indent('warnings', 2)));
-    messages.forEach((message: string) => console.warn(indent(yellow(message), 3)));
+    console.log(dim('warnings'));
+    messages.forEach((message: string) => console.warn(yellow(message)));
 }
 
 export function printErrors(messages: string[] = []): void {
-    console.log(dim(indent('errors', 2)));
-    messages.forEach((message: string) => console.error(indent(red(message), 3)));
+    console.log(dim('errors'));
+    messages.forEach((message: string) => console.error(red(message)));
 }
 
 export function printParsedFileLog(parserName: string, file: IParsedFile): void {
-    console.log(dim(indent(`${parserName} parser on ${bold(file.name)}`)));
+    console.log(dim(`${parserName} parser on ${bold(file.name)}`));
     hasInfos(file) && printInfos(file.log.infos);
     hasWarnings(file) && printWarnings(file.log.warnings);
     hasErrors(file) && printErrors(file.log.errors);
