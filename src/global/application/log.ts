@@ -6,10 +6,9 @@ export function printApplicationFileLog(file: IApplicationFile): IApplicationFil
     const name = file.name.replace(/(\.ts$)+/gmi, '');
     console.log(bold(name));
 
-    if (!hasLogs(file)) {
-        return file;
+    if (hasLogs(file)) {
+        printParsedFileLog('typescript', file);
     }
 
-    hasLogs(file) && printParsedFileLog('typescript', file);
     return file;
 }
