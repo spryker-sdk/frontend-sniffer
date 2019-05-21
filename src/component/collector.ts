@@ -8,6 +8,7 @@ export enum EComponentType {
 }
 
 export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S extends IFile = IFile, T extends IFile = IFile> {
+    namespace: string
     path: string
     name: string
     type: EComponentType
@@ -30,6 +31,7 @@ export function getComponent(path: string): IComponent {
     const deprecated = getFile(join(path, 'DEPRECATED.md'));
 
     return {
+        namespace: 'SprykerShop',
         path,
         name,
         type: <EComponentType>basename(dirname(path)).slice(0, -1),

@@ -12,7 +12,7 @@ export interface IResults {
     components: IParsedComponent[]
 }
 
-export const run = (): Promise<IResults> => new Promise((resolve) => {
+export const analyze = (): Promise<IResults> => new Promise((resolve) => {
     combineLatest(
         application,
         style,
@@ -26,13 +26,4 @@ export const run = (): Promise<IResults> => new Promise((resolve) => {
         styleSections,
         components
     }))
-})
-
-
-export const run2 = (): Promise<any> => new Promise((resolve) => {
-    combineLatest(
-        // application,
-        style,
-        component
-    ).subscribe(o => console.dir(o, {depth: null}))
 })

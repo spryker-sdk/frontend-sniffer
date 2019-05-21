@@ -1,2 +1,2 @@
-const { run2 } = require('./dist');
-run2();
+const { analyze } = require('./dist');
+analyze();

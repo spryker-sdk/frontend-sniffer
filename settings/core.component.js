@@ -6,9 +6,9 @@ exports.dirs = [
 ]
 
 exports.patterns = [
-    // '**/Theme/default/components/atoms/*',
-    '**/Theme/default/components/molecules/card',
-    // '**/Theme/default/components/organisms/*',
+    '**/Theme/default/components/atoms/*',
+    '**/Theme/default/components/molecules/*',
+    '**/Theme/default/components/organisms/*',
     ...patterns.excluded
 ]
 
