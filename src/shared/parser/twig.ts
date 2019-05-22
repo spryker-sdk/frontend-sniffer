@@ -1,39 +1,41 @@
 import { readFileSync } from 'fs';
 import { IParserOutput, TParser } from './base';
 
-interface ITag {
-    openingTagRegex: RegExp
-    closingTagRegex: RegExp
+export interface ICommentTag {
+    name: string
+    description: string
 }
 
 export interface IComment {
     description: string
-    tags: [{
-        name: string
-        description: string
-    }]
+    tags: ICommentTag[]
 }
 
-export interface IDefine {
+export interface IDefinition {
     name: string
     contract: string
     declaration: string
 }
 
-export interface IBlock {
+export interface IMacro {
+    signature: string
     comment: IComment
-    name: string
 }
 
-export interface IDeprecation {
-    description: string
-    code: string
+export interface IBlock {
+    name: string
+    comment: IComment
 }
 
 export interface ITwigApi {
-    defines: IDefine[]
-    blocks: IBlock[],
-    deprecations: IDeprecation[]
+    definitions: IDefinition[]
+    macros: IMacro[]
+    blocks: IBlock[]
+}
+
+interface ITagWidthChildrenMeta {
+    openingTagRegex: RegExp
+    closingTagRegex: RegExp
 }
 
 const allowedDefinitions = [
@@ -48,25 +50,26 @@ const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinition
 const defineClosingTagRegex = /\}\s*%\}/;
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
-const blockNameRegex = /(?<=\{%\s+block\s+)\w+(?=\s+%\})/gmi;
-const deprecationNoteRegex = /(?<=\{#\s+@deprecated\s+).+#\}\n.+/gmi;
 
-//\{#\s+.+#\}(?=(\n|\s)*\{%\s+block\s+\w+\s+%\})
-//\{#\s+.+#\}(?=(\n|\s)*\{%\s+macro\s+(\w|\(|\)|,\s)+\s+%\})
+const blockAndCommentRegex = /(\{#.+#\})?\n?\{%\s*block\s*.+\s*%\}/gmi;
+const blockNameRegex = /(?<=\{%\s*block\s+)\w+(?=\s*%\})/gmi;
+const macroAndCommentRegex = /(\{#.+#\})?\n?\{%\s*macro\s*.+\s*%\}/gmi;
+const macroSignatureRegex = /(?<=\{%\s*macro\s+)(\w|\(|\)|\s|,)+(?=\s*%\})/gmi;
+const commentRegex = /(?<=\{#\s*).+(?=\s*#\})/gmi;
 
-const tagsWithChildrenBlocks: ITag[] = [
+const tagsWithChildrenBlocks: ITagWidthChildrenMeta[] = [
     {
-        openingTagRegex: /\{%\\s+widget\\s+/gmi,
-        closingTagRegex: /\{%\\s+endwidget\\s+%\\}/gmi
+        openingTagRegex: /\{%\s*widget/gmi,
+        closingTagRegex: /\{%\s*endwidget\s*%\}/gmi
     },
     {
-        openingTagRegex: /\{%\\s+embed\\s+/gmi,
-        closingTagRegex: /\{%\\s+endembed\\s+%\\}/gmi
+        openingTagRegex: /\{%\s*embed/gmi,
+        closingTagRegex: /\{%\s*endembed\s*%\}/gmi
     }
 ];
 
 function removeTagsWithChildrenBlocks(content: string): string {
-    return tagsWithChildrenBlocks.reduce((partialContent: string, tag: ITag): string => {
+    return tagsWithChildrenBlocks.reduce((partialContent: string, tag: ITagWidthChildrenMeta): string => {
         return removeTag(partialContent, tag.openingTagRegex, tag.closingTagRegex);
     }, content);
 }
@@ -129,24 +132,78 @@ function matchAll(input: string, regex: RegExp): RegExpExecArray[] {
     return matches;
 }
 
-const createDeprecation = (note: string): IDeprecation => {
-    const [description, code] = note.split('#}');
+function extractDefinitions(content: string): IDefinition[] {
+    const declarations = content.match(defineDeclarationRegex) || [];
+    return declarations.map((declaration: string) => ({
+        name: declaration.match(defineNameRegex)[0],
+        contract: declaration.match(defineContractRegex)[0],
+        declaration
+    }))
+}
+
+function extractBlocks(content: string): IBlock[] {
+    const blocksAndComments = content.match(blockAndCommentRegex) || [];
+    return blocksAndComments
+        .map((blockAndComment: string) => {
+            const blockName = blockAndComment.match(blockNameRegex) || [];
+
+            if (blockName.length === 0) {
+                return null
+            }
+
+            return {
+                name: blockName[0],
+                comment: extractComment(content)
+            }
+        })
+}
+
+function extractMacros(content: string): IMacro[] {
+    const macrosAndComments = content.match(macroAndCommentRegex) || [];
+    return macrosAndComments
+        .map((macroAndComment: string) => {
+            const macroSignature = macroAndComment.match(macroSignatureRegex) || [];
+
+            if (macroSignature.length === 0) {
+                return null
+            }
+
+            return {
+                signature: macroSignature[0],
+                comment: extractComment(content)
+            }
+        })
+}
+
+function extractComment(content: string): IComment {
+    const comment = content.match(commentRegex) || [];
+
+    if (comment.length === 0) {
+        return null
+    }
+
+    const descriptionLastCharIndex = comment[0].indexOf('@');
     return {
-        description: description.trim(),
-        code: code.trim() + '...'
+        description: comment[0].substring(0, descriptionLastCharIndex),
+        tags: extractCommentTags(comment[0].substring(descriptionLastCharIndex))
     }
 }
 
-const createDefine = (declaration: string): IDefine => ({
-    name: declaration.match(defineNameRegex)[0],
-    contract: declaration.match(defineContractRegex)[0],
-    declaration
-})
+function extractCommentTags(content: string): ICommentTag[] {
+    const tags = content.split('@') || [];
 
-const createBlock = (name: string): IBlock => ({
-    name,
-    comment: null
-})
+    if (tags.length === 0) {
+        return null
+    }
+
+    return tags.map((tag: string) => {
+        const separatorIndex = tag.indexOf(' ');
+        return {
+            name: tag.substring(0, separatorIndex),
+            description: tag.substring(separatorIndex)
+        }
+    })
+}
 
 export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOutput<ITwigApi>> => {
     if (!file) {
@@ -155,20 +212,14 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
 
     try {
         const content = readFileSync(file, 'utf8');
-        const deprecationNotes = content.match(deprecationNoteRegex) || [];
-        const deprecations = deprecationNotes.map(createDeprecation);
-        const contentWithoutTagsWithChildrenBlocks = removeTagsWithChildrenBlocks(content);
-        const declarations = contentWithoutTagsWithChildrenBlocks.match(defineDeclarationRegex) || [];
-        const defines = declarations.map(createDefine);
-        const blockNames = contentWithoutTagsWithChildrenBlocks.match(blockNameRegex) || [];
-        const blocks = blockNames.map(createBlock);
+        const cleanedContent = removeTagsWithChildrenBlocks(content);
 
         return {
             content,
             api: {
-                defines,
-                blocks,
-                deprecations
+                definitions: extractDefinitions(content),
+                macros: extractMacros(content),
+                blocks: extractBlocks(cleanedContent)
             }
         }
     } catch (error) {
