@@ -17,7 +17,7 @@ export interface ISassApi {
 
 const read = promisify(readFile);
 
-function hasChildren(node: any): any {
+function hasChildren(node: any): boolean {
     if (!node || !node.children || node.children.length === 0) {
         return false;
     }

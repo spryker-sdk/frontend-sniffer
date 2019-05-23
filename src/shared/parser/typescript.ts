@@ -14,31 +14,35 @@ export interface IParameter {
     isOptional: boolean
 }
 
-export interface IMethod {
+export interface IFunction {
     name: string,
     description: string
     tags: ITag[]
-    visibility: string
     parameters: IParameter[]
     returnType: string
-    isAsync: boolean
+    extractAsync: boolean
+}
+
+export interface IMethod extends IFunction {
+    visibility: string
 }
 
 export interface IClass {
     name: string,
     description: string
     tags: ITag[]
+    properties: any
     methods: IMethod[]
+    accessors: any
 }
 
 export interface ITypescriptApi {
     classes: IClass[]
+    functions: IFunction[]
 }
 
 export const VisibilityMap = {
-    [ts.SyntaxKind.PublicKeyword]: 'public',
-    [ts.SyntaxKind.ProtectedKeyword]: 'protected',
-    [ts.SyntaxKind.PrivateKeyword]: 'private'
+    [ts.SyntaxKind.PublicKeyword]: 'public'
 }
 
 export const BaseTypeMap = {
@@ -53,7 +57,7 @@ export const BaseTypeMap = {
 
 const is = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind === kind;
 const isNot = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind !== kind;
-const merge = (a: any[], b: any[]): any[] => [...a, ...b];
+const merge = (a: any, b: any): any => [...a, ...b];
 const isVisibility = (node: ts.Modifier): boolean => !!VisibilityMap[node.kind];
 const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
@@ -97,9 +101,9 @@ function runDiagnosticsForProgram(program: ts.Program): IParserLog {
     return log;
 }
 
-function createTypeString(node: ts.TypeNode, isAsync: boolean = false): string {
+function createTypeString(node: ts.TypeNode, extractAsync: boolean = false): string {
     if (!node) {
-        return isAsync
+        return extractAsync
             ? `Promise<${BaseTypeMap[ts.SyntaxKind.VoidKeyword]}>`
             : BaseTypeMap[ts.SyntaxKind.VoidKeyword]
     }
@@ -127,7 +131,7 @@ function createTypeString(node: ts.TypeNode, isAsync: boolean = false): string {
     if (is(ts.SyntaxKind.UnionType)(node)) {
         return (<ts.UnionTypeNode>node)
             .types
-            .map((type: ts.TypeNode) => createTypeString(type, isAsync))
+            .map((type: ts.TypeNode) => createTypeString(type, extractAsync))
             .join('|');
     }
 
@@ -150,66 +154,55 @@ function createParameter(node: ts.ParameterDeclaration, jsDocNode: ts.JSDocParam
     };
 }
 
-function createIMethod(node: ts.MethodDeclaration): IMethod {
+function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IFunction {
     return {
         name: node.name ? node.name.getText() : '',
-        description: getDescription(node),
-        tags: getTags(node),
-        visibility: getVisibility(node),
-        parameters: getParameters(node),
-        returnType: getReturnValue(node),
-        isAsync: isAsync(node)
+        description: extractDescription(node),
+        tags: extractTags(node),
+        parameters: extractParameters(node),
+        returnType: extractReturnValue(node),
+        extractAsync: extractAsync(node)
     }
 }
 
-function createIClass(node: ts.ClassDeclaration): IClass {
+function createMethod(node: ts.MethodDeclaration): IMethod {
+    return {
+        ...createFunction(node),
+        visibility: extractVisibility(node)
+    }
+}
+
+function createClass(node: ts.ClassDeclaration): IClass {
     return {
         name: node.name ? node.name.getText() : '',
-        description: getDescription(node),
-        tags: getTags(node),
-        methods: crawlForMethods(node)
+        description: extractDescription(node),
+        tags: extractTags(node),
+        properties: null,
+        methods: crawlForMethods(node),
+        accessors: null
     }
 }
 
-function createApi(classes: IClass[]): ITypescriptApi {
-    return {
-        classes
+function createCrawler<O, I extends ts.Node = ts.Node>(creator, kind: ts.SyntaxKind) {
+    return function crawler(node: I): O {
+        const children = node
+            .getChildren();
+
+        const results = children
+            .filter(is(kind))
+            .map(creator);
+
+        return children
+            .map(crawler)
+            .reduce(merge, results);
     }
 }
 
-function crawl(root: ts.Node): ITypescriptApi {
-    return createApi(
-        crawlForClasses(root)
-    )
-}
+const crawlForFunctions = createCrawler<IFunction[]>(createFunction, ts.SyntaxKind.FunctionDeclaration);
+const crawlForMethods = createCrawler<IMethod[], ts.ClassDeclaration>(createMethod, ts.SyntaxKind.MethodDeclaration);
+const crawlForClasses = createCrawler<IClass[]>(createClass, ts.SyntaxKind.ClassDeclaration);
 
-function crawlForClasses(node: ts.Node): IClass[] {
-    const children = node
-        .getChildren();
-
-    const Iclasss = children
-        .filter(is(ts.SyntaxKind.ClassDeclaration))
-        .map(createIClass);
-
-    return children
-        .map(crawlForClasses)
-        .reduce(merge, Iclasss);
-}
-
-function crawlForMethods(node: ts.ClassDeclaration): IMethod[] {
-    const children = node
-        .getChildren();
-
-    const Imethods = children
-        .filter(is(ts.SyntaxKind.MethodDeclaration))
-        .map(createIMethod);
-
-    return children
-        .map(crawlForMethods)
-        .reduce(merge, Imethods);
-}
-
-function getVisibility(node: ts.MethodDeclaration): string {
+function extractVisibility(node: ts.MethodDeclaration): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -225,11 +218,11 @@ function getVisibility(node: ts.MethodDeclaration): string {
     return VisibilityMap[visibility.kind];
 }
 
-function getReturnValue(node: ts.MethodDeclaration): string {
-    return createTypeString(node.type, isAsync(node));
+function extractReturnValue(node: ts.MethodDeclaration | ts.FunctionDeclaration): string {
+    return createTypeString(node.type, extractAsync(node));
 }
 
-function isAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
+function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
     if (!node.modifiers) {
         return false;
     }
@@ -239,7 +232,7 @@ function isAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
         .find(is(ts.SyntaxKind.AsyncKeyword));
 }
 
-function getParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IParameter[] {
+function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IParameter[] {
     const parameterTags = <ts.JSDocParameterTag[]>ts
         .getAllJSDocTagsOfKind(node, ts.SyntaxKind.JSDocParameterTag);
 
@@ -250,14 +243,14 @@ function getParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IPa
         );
 }
 
-function getTags(node: ts.Node): ITag[] {
+function extractTags(node: ts.Node): ITag[] {
     return ts
         .getJSDocTags(node)
         .filter(isNot(ts.SyntaxKind.JSDocParameterTag))
         .map(createTag);
 }
 
-function getDescription(node: ts.Node): string {
+function extractDescription(node: ts.Node): string {
     const commentNode = <ts.JSDoc>node
         .getChildren()
         .find(is(ts.SyntaxKind.JSDocComment));
@@ -299,7 +292,10 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
         return {
             content: null,
             api: {
-                external: crawl(sourceFile),
+                external: {
+                    classes: crawlForClasses(sourceFile),
+                    functions: crawlForFunctions(sourceFile)
+                },
                 internal: null
             },
             log

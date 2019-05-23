@@ -27,3 +27,18 @@ export const analyze = (): Promise<IResults> => new Promise((resolve) => {
         components
     }))
 })
+
+// export const analyze = (): Promise<IResults> => new Promise((resolve) => {
+//     combineLatest(
+//         application,
+//         // style,
+//         // component
+//     ).subscribe(([
+//         applicationFiles,
+//         // styleSections,
+//         // components
+//     ]) => {
+//         console.dir(applicationFiles, {depth: null});
+//         return resolve()
+//     })
+// })
