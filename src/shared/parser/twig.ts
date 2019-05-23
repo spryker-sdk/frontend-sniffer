@@ -217,15 +217,21 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
         return {
             content,
             api: {
-                definitions: extractDefinitions(content),
-                macros: extractMacros(content),
-                blocks: extractBlocks(cleanedContent)
-            }
+                external: {
+                    definitions: extractDefinitions(content),
+                    macros: extractMacros(content),
+                    blocks: extractBlocks(cleanedContent)
+                },
+                internal: null
+            },
         }
     } catch (error) {
         return {
             content: null,
-            api: null,
+            api: {
+                external: null,
+                internal: null
+            },
             log: {
                 errors: [error.stack]
             }

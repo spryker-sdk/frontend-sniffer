@@ -16,12 +16,18 @@ export const parse: TParser<void> = async (file: string): Promise<IParserOutput<
 
         return {
             content: markdownConverter.makeHtml(content),
-            api: null
+            api: {
+                external: null,
+                internal: null
+            }
         }
     } catch (error) {
         return {
             content: null,
-            api: null,
+            api: {
+                external: null,
+                internal: null
+            },
             log: {
                 errors: [error.stack]
             }

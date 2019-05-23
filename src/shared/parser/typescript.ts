@@ -282,7 +282,10 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
         if (!sourceFile) {
             return {
                 content: null,
-                api: null,
+                api: {
+                    external: null,
+                    internal: null
+                },
                 log: {
                     ...log,
                     errors: [
@@ -295,13 +298,19 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
 
         return {
             content: null,
-            api: crawl(sourceFile),
+            api: {
+                external: crawl(sourceFile),
+                internal: null
+            },
             log
         }
     } catch (error) {
         return {
             content: null,
-            api: null,
+            api: {
+                external: null,
+                internal: null
+            },
             log: {
                 errors: [error.stack]
             }

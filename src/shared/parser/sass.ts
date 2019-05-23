@@ -17,8 +17,16 @@ export interface ISassApi {
 
 const read = promisify(readFile);
 
+function hasChildren(node: any): any {
+    if (!node || !node.children || node.children.length === 0) {
+        return false;
+    }
+
+    return true;
+}
+
 function getChildren(node: any): any {
-    if (!node || !node.children) {
+    if (!hasChildren(node)) {
         return [];
     }
 
@@ -88,15 +96,61 @@ function extractArgument(declarationNode: any) {
     const variableNode = find(declarationNode, { type: 'variable' });
     const nameNode = find(variableNode, { type: 'ident' });
     const valueNode = find(declarationNode, { type: 'value' });
-    const amountNode = find(valueNode, node => is('number', node) || is('string', node));
-    const unitNode = find(valueNode, { type: 'ident' });
-    const amount = !!amountNode ? amountNode.value : '';
-    const unit = !!unitNode ? unitNode.value : '';
 
     return {
         name: nameNode.value,
-        value: amount + unit
+        value: extractValue(valueNode)
     }
+}
+
+function extractValue(valueNode) {
+    if (!hasChildren(valueNode)) {
+        return null;
+    }
+
+    const getValue = (node) => getChildren(node).reduce((value: string, childNode) => {
+        if (is('map', childNode) && hasChildren(childNode)) {
+            value += `(${getValue(childNode)})`;
+            return value;
+        }
+
+        if (is('arguments', childNode) && hasChildren(childNode)) {
+            value += `(${getValue(childNode)})`;
+            return value;
+        }
+
+        if (is('variable', childNode) && hasChildren(childNode)) {
+            value += `$${getChildren(childNode)[0].value}`;
+            return value;
+        }
+
+        if (hasChildren(childNode)) {
+            value += getValue(childNode);
+            return value;
+        }
+
+        if (is('parentheses', childNode)) {
+            value += '()';
+            return value;
+        }
+
+        if (is('color', childNode)) {
+            value += '#';
+        }
+
+        if (is('variable', childNode)) {
+            value += '$';
+        }
+
+        if (childNode.hasOwnProperty('value')) {
+            value += childNode.value;
+            return value;
+        }
+
+        return value;
+    }, '')
+
+    return getValue(valueNode);
 }
 
 function extractEmptyArgument(variableNode: any) {
@@ -253,16 +307,22 @@ export const parse: TParser<ISassApi> = async (file: string): Promise<IParserOut
         return {
             content,
             api: {
-                variables: extractSharedVariables(stylesheetNode),
-                mixins: extractSharedMixins(stylesheetNode),
-                functions: extractSharedFunctions(stylesheetNode),
-                modifiers: extractBlockModifiers(stylesheetNode)
+                external: {
+                    variables: extractSharedVariables(stylesheetNode),
+                    mixins: extractSharedMixins(stylesheetNode),
+                    functions: extractSharedFunctions(stylesheetNode),
+                    modifiers: extractBlockModifiers(stylesheetNode)
+                },
+                internal: null
             }
         }
     } catch (error) {
         return {
             content: null,
-            api: null,
+            api: {
+                external: null,
+                internal: null
+            },
             log: {
                 errors: [error.stack]
             }

@@ -6,9 +6,12 @@ export interface IParserLog {
     errors?: string[]
 }
 
-export interface IParserOutput<T = any> {
-    content: string,
-    api: T,
+export interface IParserOutput<E = any, I = any> {
+    content: string
+    api: {
+        external: E
+        internal: I
+    }
     log?: IParserLog
 }
 
