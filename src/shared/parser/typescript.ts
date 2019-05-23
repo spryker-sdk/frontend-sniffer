@@ -183,13 +183,18 @@ function createClass(node: ts.ClassDeclaration): IClass {
     }
 }
 
-function createCrawler<O, I extends ts.Node = ts.Node>(creator, kind: ts.SyntaxKind) {
-    return function crawler(node: I): O {
+function createCrawler<O, I extends ts.Node = ts.Node>(
+    kind: ts.SyntaxKind,
+    creator: (node: ts.Node) => O,
+    filter: (node: ts.Node) => boolean = () => true
+) {
+    return function crawler(node: I): O[] {
         const children = node
             .getChildren();
 
         const results = children
             .filter(is(kind))
+            .filter(filter)
             .map(creator);
 
         return children
@@ -198,9 +203,20 @@ function createCrawler<O, I extends ts.Node = ts.Node>(creator, kind: ts.SyntaxK
     }
 }
 
-const crawlForFunctions = createCrawler<IFunction[]>(createFunction, ts.SyntaxKind.FunctionDeclaration);
-const crawlForMethods = createCrawler<IMethod[], ts.ClassDeclaration>(createMethod, ts.SyntaxKind.MethodDeclaration);
-const crawlForClasses = createCrawler<IClass[]>(createClass, ts.SyntaxKind.ClassDeclaration);
+const crawlForFunctions = createCrawler<IFunction, ts.SourceFile>(
+    ts.SyntaxKind.FunctionDeclaration,
+    createFunction
+);
+
+const crawlForMethods = createCrawler<IMethod, ts.ClassDeclaration>(
+    ts.SyntaxKind.MethodDeclaration,
+    createMethod
+);
+
+const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
+    ts.SyntaxKind.ClassDeclaration,
+    createClass
+);
 
 function extractVisibility(node: ts.MethodDeclaration): string {
     if (!node.modifiers) {
