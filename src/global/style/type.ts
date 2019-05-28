@@ -19,5 +19,3 @@ export function toStyleFile(file: IParsedFile<ISassApi>): IStyleFile {
         type: <EStyleType>basename(dirname(file.path)).slice(0, -1)
     }
 }
-
-export const byType = (file: IStyleFile): EStyleType => file.type
