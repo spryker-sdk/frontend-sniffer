@@ -29,8 +29,8 @@ export interface IBlock {
 
 export interface ITwigApi {
     definitions: IDefinition[]
-    macros: IMacro[]
-    blocks: IBlock[]
+    // macros: IMacro[]
+    // blocks: IBlock[]
 }
 
 interface ITagWidthChildrenMeta {
@@ -51,9 +51,9 @@ const defineClosingTagRegex = /\}\s*%\}/;
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
 
-const blockAndCommentRegex = /(\{#((.+\n)|.)+#\}\n?)*?\{%\s*[^\n]block.+%\}/gmi;
+const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*block.+%\}/gmi;
 const blockNameRegex = /(?<=\{%\s*block\s+)\w+(?=\s*%\})/gmi;
-const macroAndCommentRegex = /(\{#((.+\n)|.)+#\}\n?)*?\{%\s*[^\n]macro.+%\}/gmi;
+const macroAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*macro.+%\}/gmi;
 const macroSignatureRegex = /(?<=\{%\s*macro\s+)(\w|\(|\)|\s|,)+(?=\s*%\})/gmi;
 const commentRegex = /(?<=\{#)(.|\s)+(?=#\})/gmi;
 
@@ -219,8 +219,8 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
             api: {
                 external: {
                     definitions: extractDefinitions(content),
-                    macros: extractMacros(content),
-                    blocks: extractBlocks(cleanedContent)
+                    // macros: extractMacros(content),
+                    // blocks: extractBlocks(cleanedContent)
                 },
                 internal: null
             },
