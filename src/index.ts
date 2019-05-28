@@ -3,12 +3,12 @@ import application from './global/application';
 import style from './global/style';
 import component from './component';
 import { IApplicationFile } from './global/application/api';
-import { IStyleSection } from './global/style/section';
+import { IStyleFile } from './global/style/style';
 import { IParsedComponent } from './component/api';
 
 export interface IResults {
     applicationFiles: IApplicationFile[]
-    styleSections: IStyleSection[]
+    styleFiles: IStyleFile[]
     components: IParsedComponent[]
 }
 
@@ -19,26 +19,26 @@ export const analyze = (): Promise<IResults> => new Promise((resolve) => {
         component
     ).subscribe(([
         applicationFiles,
-        styleSections,
+        styleFiles,
         components
     ]) => resolve({
         applicationFiles,
-        styleSections,
+        styleFiles,
         components
     }))
 })
 
 // export const analyze = (): Promise<IResults> => new Promise((resolve) => {
 //     combineLatest(
-//         application,
-//         // style,
+//         // application,
+//         style,
 //         // component
 //     ).subscribe(([
-//         applicationFiles,
-//         // styleSections,
+//         // applicationFiles,
+//         styleFiles,
 //         // components
 //     ]) => {
-//         console.dir(applicationFiles, {depth: null});
+//         console.dir(styleFiles, {depth: 2});
 //         return resolve()
 //     })
 // })
