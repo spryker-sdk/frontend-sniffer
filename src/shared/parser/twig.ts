@@ -29,8 +29,8 @@ export interface IBlock {
 
 export interface ITwigApi {
     definitions: IDefinition[]
-    // macros: IMacro[]
-    // blocks: IBlock[]
+    macros: IMacro[]
+    blocks: IBlock[]
 }
 
 interface ITagWidthChildrenMeta {
@@ -219,8 +219,8 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
             api: {
                 external: {
                     definitions: extractDefinitions(content),
-                    // macros: extractMacros(content),
-                    // blocks: extractBlocks(cleanedContent)
+                    macros: [], //extractMacros(content),
+                    blocks: [] //extractBlocks(cleanedContent)
                 },
                 internal: null
             },
