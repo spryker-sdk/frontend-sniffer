@@ -220,7 +220,10 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
                 external: {
                     definitions: extractDefinitions(content),
                     macros: [], //extractMacros(content),
-                    blocks: [] //extractBlocks(cleanedContent)
+                    blocks: [{
+                        name: 'test',
+                        comment: null
+                    }] //extractBlocks(cleanedContent)
                 },
                 internal: null
             },

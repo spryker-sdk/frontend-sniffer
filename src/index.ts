@@ -3,7 +3,7 @@ import application from './global/application';
 import style from './global/style';
 import component from './component';
 import { IApplicationFile } from './global/application/api';
-import { IStyleFile } from './global/style/style';
+import { IStyleFile } from './global/style/api';
 import { IParsedComponent } from './component/api';
 
 export interface IResults {

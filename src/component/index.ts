@@ -9,10 +9,6 @@ const component = settings.core.component;
 
 export default scan(component.dirs, component.patterns, component.options).pipe(
     map(getComponent),
-    map(c => {
-        console.log(c.name);
-        return c;
-    }),
     flatMap(readme),
     flatMap(deprecated),
     flatMap(twig),

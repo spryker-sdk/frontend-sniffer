@@ -1,6 +1,6 @@
 import { bold, dim } from 'colors';
 import { hasLogs, printParsedFileLog } from '../../shared/log';
-import { IStyleFile } from './style';
+import { IStyleFile } from './api';
 
 export function printStyleLog(file: IStyleFile): IStyleFile {
     const name = file.name.replace(/(^_|\.scss$)+/gmi, '');
