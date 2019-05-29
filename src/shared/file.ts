@@ -1,10 +1,12 @@
 import { existsSync } from 'fs';
 import { basename } from 'path';
+import settings from '../settings';
 
 export interface IFile {
     exists: boolean
     name: string
     path: string
+    relativePath: string
 }
 
 export function getFile(path: string): IFile {
@@ -12,13 +14,15 @@ export function getFile(path: string): IFile {
         return {
             exists: false,
             name: null,
-            path: null
+            path: null,
+            relativePath: null
         }
     }
 
     return {
         exists: true,
         name: basename(path),
-        path
+        path,
+        relativePath: path.replace(settings.root, '')
     }
 }

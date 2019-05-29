@@ -16,7 +16,6 @@ export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S 
     type: EComponentType
     module: string
     isDeprecated: boolean
-    deprecationNote?: string
     files: {
         _index: IFile
         _style: IFile

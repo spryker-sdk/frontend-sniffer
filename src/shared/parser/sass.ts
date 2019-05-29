@@ -12,6 +12,7 @@ export interface ISassApi {
     variables: any[]
     mixins: any[]
     functions: any[]
+    classes: any[]
     modifiers: any[]
 }
 
@@ -220,6 +221,11 @@ function extractSharedFunctions(stylesheetNode: any) {
         }
 
         const parent = parents[parents.length - 1];
+
+        if (!is('atrule', parent)) {
+            return;
+        }
+
         const grandParent = parents[parents.length - 2];
         functionSet.add({ node, parent, grandParent });
     });
@@ -251,6 +257,33 @@ function extractFunction(functionNode: any, parentNode: any, grandParentNode: an
         name,
         arguments: args
     }
+}
+
+function extractClasses(stylesheetNode: any) {
+    const classNameMap = new Map<string, any>();
+
+    visitParents(stylesheetNode, 'selector', (selectorNode, selectorAncestorNodes) => {
+        visitParents(selectorNode, 'ident', (classNode, classAncestorNodes) => {
+            const classParentNode = classAncestorNodes[classAncestorNodes.length - 1];
+            const classGrandParentNode = classAncestorNodes[classAncestorNodes.length - 2];
+
+            if (!is('class', classParentNode) || !is('selector', classGrandParentNode)) {
+                return;
+            }
+
+            const name = classNode.value;
+            const selectorParentNode = selectorAncestorNodes[selectorAncestorNodes.length - 1];
+            const selectorGrandParentNode = selectorAncestorNodes[selectorAncestorNodes.length - 2];
+            const comment = extractComment(selectorParentNode, selectorGrandParentNode);
+
+            classNameMap.set(name, {
+                comment,
+                name
+            });
+        });
+    });
+
+    return Array.from(classNameMap.values());
 }
 
 function extractBlockModifiers(stylesheetNode: any) {
@@ -311,6 +344,7 @@ export const parse: TParser<ISassApi> = async (file: string): Promise<IParserOut
                     variables: extractSharedVariables(stylesheetNode),
                     mixins: extractSharedMixins(stylesheetNode),
                     functions: extractSharedFunctions(stylesheetNode),
+                    classes: extractClasses(stylesheetNode),
                     modifiers: extractBlockModifiers(stylesheetNode)
                 },
                 internal: null

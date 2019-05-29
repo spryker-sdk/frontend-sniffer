@@ -2,14 +2,15 @@ import { map, flatMap, toArray, groupBy, mergeMap } from 'rxjs/operators';
 import settings from '../../settings';
 import { scan } from '../../shared/scanner';
 import { getFile } from '../../shared/file';
-import { typescript } from '../../global/application/api';
-import { printApplicationFileLog } from './log';
+import { typescript, IApplicationFile } from '../../global/application/api';
+import { printProcessingFile, createParsedFileLogPrinter } from '../../shared/log';
 
-const { application } = settings.core.global;
+const { dirs, patterns, options } = settings.core.global.application;
 
-export default scan(application.dirs, application.patterns, application.options).pipe(
+export default scan(dirs, patterns, options).pipe(
     map(getFile),
+    map(printProcessingFile),
     flatMap(typescript),
-    map(printApplicationFileLog),
+    map(createParsedFileLogPrinter<IApplicationFile>()),
     toArray()
 )

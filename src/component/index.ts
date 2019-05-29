@@ -4,10 +4,12 @@ import { scan } from '../shared/scanner';
 import { readme, deprecated, twig, sass, typescript } from '../component/api';
 import { getComponent } from '../component/collector';
 import { printComponentLog } from '../component/log';
+import { printProcessingDir } from '../shared/log';
 
-const component = settings.core.component;
+const { dirs, patterns, options } = settings.core.component;
 
-export default scan(component.dirs, component.patterns, component.options).pipe(
+export default scan(dirs, patterns, options).pipe(
+    map(printProcessingDir),
     map(getComponent),
     flatMap(readme),
     flatMap(deprecated),

@@ -38,7 +38,7 @@ export const analyze = (): Promise<IResults> => new Promise((resolve) => {
 //         styleFiles,
 //         // components
 //     ]) => {
-//         console.dir(styleFiles, {depth: 2});
+//         // console.dir(styleFiles, {depth: 2});
 //         return resolve()
 //     })
 // })
