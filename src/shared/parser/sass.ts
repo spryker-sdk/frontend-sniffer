@@ -216,13 +216,21 @@ function extractSharedFunctions(stylesheetNode: any) {
     const functionSet = new Set();
 
     visitParents(stylesheetNode, 'function', (node, parents) => {
-        if (!node || !node.children || !parents || parents.legth < 2) {
+        if (!node.children || !parents || parents.legth < 2) {
             return;
         }
 
         const parent = parents[parents.length - 1];
 
         if (!is('atrule', parent)) {
+            return;
+        }
+
+        const atKeywordNode = findBefore(parent, node, 'atkeyword');
+        const atKeywordIdentity = getChildren(atKeywordNode).find(childNode => is('ident', childNode))
+        const isFunctionDeclaration = !!atKeywordIdentity && atKeywordIdentity.value === 'function';
+
+        if (!isFunctionDeclaration) {
             return;
         }
 
