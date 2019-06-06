@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { basename } from 'path';
-import settings from '../settings';
+import settings from '../../settings';
 
 export interface IFile {
     exists: boolean

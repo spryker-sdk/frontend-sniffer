@@ -175,7 +175,7 @@ function extractSharedMixins(stylesheetNode: any) {
     });
 
     const mixins = Array.from(mixinSet);
-    return mixins.map(data => extractMixin(data.node, data.parent));
+    return mixins.map((data: any) => extractMixin(data.node, data.parent));
 }
 
 function extractMixin(mixinNode: any, parentNode: any): any {
@@ -239,7 +239,7 @@ function extractSharedFunctions(stylesheetNode: any) {
     });
 
     const functions = Array.from(functionSet);
-    return functions.map(data => extractFunction(data.node, data.parent, data.grandParent));
+    return functions.map((data: any) => extractFunction(data.node, data.parent, data.grandParent));
 }
 
 function extractFunction(functionNode: any, parentNode: any, grandParentNode: any): any {

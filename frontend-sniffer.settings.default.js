@@ -1,6 +1,7 @@
 const { join } = require('path');
+const cwd = process.cwd();
 
-exports.root = join(process.cwd(), '../suite-nonsplit/project');
+exports.root = join(cwd, '../suite-nonsplit/project');
 
 const defaultDirs = [
     join(exports.root, './vendor/spryker/spryker-shop'),
@@ -33,7 +34,7 @@ exports.core.global.application = {
         onlyDirectories: false
     }
 }
-exports.core.global.style = {
+exports.core.global.styles = {
     dirs: [
         ...defaultDirs
     ],
@@ -54,7 +55,7 @@ exports.core.global.style = {
         onlyDirectories: false
     }
 }
-exports.core.component = {
+exports.core.components = {
     dirs: [
         ...defaultDirs
     ],
@@ -75,5 +76,23 @@ exports.core.component = {
 exports.project = {}
 exports.project.global = {}
 exports.project.global.application = {}
-exports.project.global.style = {}
+exports.project.global.styles = {}
 exports.project.components = {}
+
+exports.sniffer = {}
+exports.sniffer.rules = {
+    dirs: [
+        join(__dirname, './dist/sniffer/rules'),
+    ],
+    patterns: [
+        '*.js',
+        '!*.map',
+        '!*.ts'
+    ],
+    options: {
+        followSymlinkedDirectories: false,
+        absolute: true,
+        onlyFiles: true,
+        onlyDirectories: false
+    }
+}

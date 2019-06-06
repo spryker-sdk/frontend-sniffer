@@ -1,44 +1,11 @@
-import { combineLatest } from 'rxjs';
-import application from './global/application';
-import style from './global/style';
-import component from './component';
-import { IApplicationFile } from './global/application/api';
-import { IStyleFile } from './global/style/api';
-import { IParsedComponent } from './component/api';
+import runCollector from './collector';
+import runSniffer from './sniffer';
+import { set, get } from './environment';
+import { debugEnvironment } from './log';
 
-export interface IResults {
-    applicationFiles: IApplicationFile[]
-    styleFiles: IStyleFile[]
-    components: IParsedComponent[]
-}
+export const setEnvironment = set;
+export const getEnvironment = get;
+export const collect = async () => runCollector();
+export const sniff = async () => runSniffer();
 
-export const analyze = (): Promise<IResults> => new Promise((resolve) => {
-    combineLatest(
-        application,
-        style,
-        component
-    ).subscribe(([
-        applicationFiles,
-        styleFiles,
-        components
-    ]) => resolve({
-        applicationFiles,
-        styleFiles,
-        components
-    }))
-})
-
-// export const analyze = (): Promise<IResults> => new Promise((resolve) => {
-//     combineLatest(
-//         // application,
-//         style,
-//         // component
-//     ).subscribe(([
-//         // applicationFiles,
-//         styleFiles,
-//         // components
-//     ]) => {
-//         // console.dir(styleFiles, {depth: 2});
-//         return resolve()
-//     })
-// })
+debugEnvironment();

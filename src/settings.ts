@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { yellow } from 'colors';
+import { info } from './shared/log';
 
 const SETTINGS_FILENAME = 'frontend-sniffer.settings';
 
@@ -10,8 +10,7 @@ const defaultSettings = require(`../${SETTINGS_FILENAME}.default.js`);
 
 const settings: any = ((): any => {
     if (!existsSync(settingFile)) {
-        console.warn(yellow(`No ${SETTINGS_FILENAME}.js found in the current folder.`));
-        console.warn(yellow(`Default configuration will be used.`));
+        info.print(`No ${SETTINGS_FILENAME}.js found in the current folder.\nDefault configuration will be used.`);
         return defaultSettings;
     }
 
@@ -23,7 +22,5 @@ const settings: any = ((): any => {
         cwd
     }
 })()
-
-
 
 export default settings;

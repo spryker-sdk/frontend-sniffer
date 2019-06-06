@@ -55,7 +55,7 @@ const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*block.+%\}/gmi;
 const blockNameRegex = /(?<=\{%\s*block\s+)\w+(?=\s*%\})/gmi;
 const macroAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*macro.+%\}/gmi;
 const macroSignatureRegex = /(?<=\{%\s*macro\s+)(\w|\(|\)|\s|,)+(?=\s*%\})/gmi;
-const commentRegex = /(?<=\{#)(.|\s)+(?=#\})/gmi;
+const commentRegex = /(?<=\{#)(.|\n)+(?=#\})/gmi;
 
 const tagsWithChildrenBlocks: ITagWidthChildrenMeta[] = [
     {
@@ -219,11 +219,8 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
             api: {
                 external: {
                     definitions: extractDefinitions(content),
-                    macros: [], //extractMacros(content),
-                    blocks: [{
-                        name: 'test',
-                        comment: null
-                    }] //extractBlocks(cleanedContent)
+                    macros: extractMacros(content),
+                    blocks: extractBlocks(cleanedContent)
                 },
                 internal: null
             },

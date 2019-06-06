@@ -1,7 +1,7 @@
 import { basename, dirname } from 'path';
-import { IFile } from '../../shared/file';
-import { IParsedFile, IParserOutput } from '../../shared/parser/base';
-import { parse as parseSass, ISassApi } from '../../shared/parser/sass';
+import { IFile } from '../shared/file';
+import { IParsedFile, IParserOutput } from '../shared/parser/base';
+import { parse, ISassApi } from '../shared/parser/sass';
 
 export enum EStyleType {
     Setting = 'setting',
@@ -14,9 +14,9 @@ export interface IStyleFile extends IParsedFile<ISassApi> {
     type: EStyleType
 }
 
-export async function sass(file: IFile): Promise<IStyleFile> {
+export async function parseSass(file: IFile): Promise<IStyleFile> {
     const type: EStyleType = <EStyleType>basename(dirname(file.path)).slice(0, -1);
-    const output: IParserOutput<ISassApi> = await parseSass(file.path);
+    const output: IParserOutput<ISassApi> = await parse(file.path);
 
     return {
         ...file,

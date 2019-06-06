@@ -1,2 +1,1 @@
-const { analyze } = require('./dist');
-analyze();
+require('./bin');
