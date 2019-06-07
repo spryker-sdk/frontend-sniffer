@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { join, dirname, basename } from 'path';
-import { IFile, getFile } from '../shared/file';
+import { IFile, getFile } from '../file';
 
 export enum EComponentType {
     Atom = 'atom',

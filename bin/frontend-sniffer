@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+const program = require('commander');
+const { error } = require('../dist/log');
+const { environment, sniff, collect } = require('../api');
+const { version } = require('../package.json');
+
+const run = (fn) => {
+    fn().catch(err => !!err && error.print('Error:', err));
+}
+
+program
+    .version(version, '-v, --version')
+    .arguments('[project-path]')
+    .option('-p, --project-path [path]', 'set the target project [path]', process.cwd())
+    .option('-e, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
+    .option('-c, --collect-only [n]', 'collect only the first [n] elements for each stream', null)
+    .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
+    .parse(process.argv);
+
+const isValid = environment.update({
+    projectPath: program.projectPath,
+    excludeSniffer: program.excludeSniffer,
+    collectOnly: program.collectOnly,
+    debugMode: program.debugMode
+})
+
+if (!isValid) {
+    process.exit();
+}
+
+if (environment.excludeSniffer) {
+    run(collect);
+    return;
+}
+
+run(sniff);

@@ -15,23 +15,23 @@ export class TestOutcome {
         this.ruleName = ruleName;
     }
 
-    public addLog(message: string): void {
+    addLog(message: string): void {
         this.logMessages.push(message);
     }
 
-    public addWarning(message: string): void {
+    addWarning(message: string): void {
         this.warningMessages.push(message);
     }
 
-    public addError(message: string): void {
+    addError(message: string): void {
         this.errorMessages.push(message);
     }
 
-    public get name(): string {
+    get name(): string {
         return this.ruleName;
     }
 
-    public get result(): TestResult {
+    get result(): TestResult {
         if (this.errorMessages.length > 0) {
             return TestResult.FAILED;
         }
@@ -43,7 +43,7 @@ export class TestOutcome {
         return TestResult.SUCCEDED;
     }
 
-    public get isValid(): boolean {
+    get isValid(): boolean {
         if (this.errorMessages.length > 0) {
             return false;
         }
@@ -51,15 +51,15 @@ export class TestOutcome {
         return true;
     }
 
-    public get logs(): string[] {
+    get logs(): string[] {
         return this.logMessages;
     }
 
-    public get warnings(): string[] {
+    get warnings(): string[] {
         return this.warningMessages;
     }
 
-    public get errors(): string[] {
+    get errors(): string[] {
         return this.errorMessages;
     }
 }

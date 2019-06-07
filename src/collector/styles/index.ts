@@ -1,22 +1,21 @@
-import { iif } from 'rxjs';
+import { iif, Observable } from 'rxjs';
 import { map, flatMap, toArray, tap, take } from 'rxjs/operators';
-import settings from '../../settings';
-import { scan } from '../../shared/scanner';
-import { getFile, IFile } from '../shared/file';
+import { config } from '../config';
+import { scan } from '../../scanner';
+import { getFile, IFile } from '../file';
 import { parseSass, IStyleFile } from './parser';
-import { printParsedFileLog } from '../shared/log';
-import { createDebugger, createLogger } from '../../shared/log';
-import { get as environment } from '../../environment';
+import { printParsedFileLog } from '../log';
+import { createDebugger, createLogger } from '../../log';
+import { environment } from '../../environment';
 
-const { dirs, patterns, options } = settings.core.global.styles;
-const scanForStyles = scan(dirs, patterns, options);
 const debugFile = createDebugger<IFile>('Collecting style', 'name');
 const logCollection = createLogger<IStyleFile[]>('Styles:', 'length');
+const scanForFiles = (): Observable<string> => scan(config.settings.core.scan.styles)
 
-export default iif(
-    () => !!environment().takeOnly,
-    scanForStyles.pipe(take(environment().takeOnly)),
-    scanForStyles
+export const getObservable = (): Observable<IStyleFile[]> => iif(
+    () => environment.isCollectOnly,
+    scanForFiles().pipe(take(environment.collectOnly)),
+    scanForFiles()
 ).pipe(
     map(getFile),
     tap(debugFile),

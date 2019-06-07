@@ -1,11 +1,12 @@
 import { combineLatest, Observable } from 'rxjs';
-import applicationCollectorObservable from './application';
-import stylesCollectorObservable from './styles';
-import componentsCollectorObservable from './components';
+import { getObservable as getApplicationObservable } from './application';
+import { getObservable as getStylesObservable } from './styles';
+import { getObservable as getComponentsObservable } from './components';
 import { IApplicationFile } from './application/parser';
 import { IStyleFile } from './styles/parser';
 import { IParsedComponent } from './components/parser';
-import { printHeading } from './log';
+import { info } from '../log';
+import { config } from './config';
 
 export type TCollectorObservableOutput = [IApplicationFile[], IStyleFile[], IParsedComponent[]];
 
@@ -15,22 +16,17 @@ export interface ICollectorOutput {
     components: IParsedComponent[]
 }
 
-export function getObservable(): Observable<TCollectorObservableOutput> {
-    printHeading();
+export const collect = (): Promise<ICollectorOutput> => new Promise<ICollectorOutput>((resolve, reject) => {
+    info.print('\nRunning collector...');
+    config.load();
 
     return combineLatest(
-        applicationCollectorObservable,
-        stylesCollectorObservable,
-        componentsCollectorObservable
-    )
-}
-
-export const parseCollectorObservableOutput = (observableOutput: TCollectorObservableOutput): ICollectorOutput => ({
-    applicationFiles: observableOutput[0],
-    styleFiles: observableOutput[1],
-    components: observableOutput[2]
+        getApplicationObservable(),
+        getStylesObservable(),
+        getComponentsObservable()
+    ).subscribe((observableOutput: TCollectorObservableOutput) => resolve({
+        applicationFiles: observableOutput[0],
+        styleFiles: observableOutput[1],
+        components: observableOutput[2]
+    }))
 })
-
-export default (): Promise<ICollectorOutput> => new Promise<ICollectorOutput>((resolve) => getObservable()
-    .subscribe((observableOutput: TCollectorObservableOutput) => resolve(parseCollectorObservableOutput(observableOutput)))
-)

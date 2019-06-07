@@ -1,22 +1,21 @@
-import { iif } from 'rxjs';
+import { iif, Observable } from 'rxjs';
 import { map, flatMap, toArray, tap, take } from 'rxjs/operators';
 import { parseReadme, parseDeprecated, parseTwig, parseSass, parseTypescript, IParsedComponent } from './parser';
 import { getComponent, IComponent } from './component';
 import { printParsedComponentLog } from './log';
-import settings from '../../settings';
-import { scan } from '../../shared/scanner';
-import { createDebugger, createLogger } from '../../shared/log';
-import { get as environment } from '../../environment';
+import { config } from '../config';
+import { scan } from '../../scanner';
+import { createDebugger, createLogger } from '../../log';
+import { environment } from '../../environment';
 
-const { dirs, patterns, options } = settings.core.components;
-const scanForComponents = scan(dirs, patterns, options);
 const debugComponent = createDebugger<IComponent>('Collecting component', 'namespace', 'module', 'type', 'name');
 const logCollection = createLogger<IParsedComponent[]>('Components:', 'length');
+const scanForComponents = (): Observable<string> => scan(config.settings.core.scan.components);
 
-export default iif(
-    () => !!environment().takeOnly,
-    scanForComponents.pipe(take(environment().takeOnly)),
-    scanForComponents
+export const getObservable = (): Observable<IParsedComponent[]> => iif(
+    () => environment.isCollectOnly,
+    scanForComponents().pipe(take(environment.collectOnly)),
+    scanForComponents()
 ).pipe(
     map(getComponent),
     tap(debugComponent),

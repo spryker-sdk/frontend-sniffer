@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { basename } from 'path';
-import settings from '../../settings';
+import { environment } from '../environment';
 
 export interface IFile {
     exists: boolean
@@ -23,6 +23,6 @@ export function getFile(path: string): IFile {
         exists: true,
         name: basename(path),
         path,
-        relativePath: path.replace(settings.root, '')
+        relativePath: path.replace(environment.projectPath, '')
     }
 }

@@ -1,6 +1,6 @@
-import { IFile } from '../shared/file';
-import { IParsedFile, IParserOutput } from '../shared/parser/base';
-import { parse, ITypescriptApi } from '../shared/parser/typescript';
+import { IFile } from '../file';
+import { IParsedFile, IParserOutput } from '../parsers/base';
+import { parse, ITypescriptApi } from '../parsers/typescript';
 
 export interface IApplicationFile extends IParsedFile<ITypescriptApi> { }
 

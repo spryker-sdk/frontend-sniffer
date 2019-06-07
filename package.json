@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE FILE",
   "bin": {
-    "fe-sniff": "./bin/index.js"
+    "frontend-sniffer": "./bin/frontend-sniffer"
   },
   "scripts": {
     "postinstall": "tsc -p .",

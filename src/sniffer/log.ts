@@ -1,9 +1,7 @@
 import { TestOutcome } from './test-outcome';
-import { log, info, success, warn, error } from '../shared/log';
+import { log, info, success, warn, error } from '../log';
 import { IEvaluation } from './evaluator';
 import { bold } from 'colors';
-
-export const printHeading = (): void => info.print('\nRunning sniffer...')
 
 export function printRuleOutcome(outcome: TestOutcome): TestOutcome {
     log.print(`Rule ${outcome.name} ${bold(outcome.result)}`);

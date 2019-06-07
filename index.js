@@ -1,1 +1,1 @@
-require('./bin');
+require('./bin/frontend-sniffer');

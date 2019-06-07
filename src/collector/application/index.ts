@@ -1,22 +1,21 @@
-import { iif } from 'rxjs';
+import { iif, Observable } from 'rxjs';
 import { map, flatMap, toArray, tap, take } from 'rxjs/operators';
-import settings from '../../settings';
-import { scan } from '../../shared/scanner';
-import { getFile, IFile } from '../shared/file';
+import { config } from '../config';
+import { scan } from '../../scanner';
+import { getFile, IFile } from '../file';
 import { parseTypescript, IApplicationFile } from './parser';
-import { printParsedFileLog } from '../shared/log';
-import { createDebugger, createLogger } from '../../shared/log';
-import { get as environment } from '../../environment';
+import { printParsedFileLog } from '../log';
+import { createDebugger, createLogger } from '../../log';
+import { environment } from '../../environment';
 
-const { dirs, patterns, options } = settings.core.global.application;
-const scanForApplicationFiles = scan(dirs, patterns, options);
 const debugFile = createDebugger<IFile>('Collecting application file', 'name');
 const logCollection = createLogger<IApplicationFile[]>('Application files:', 'length');
+const scanForApplicationFiles = (): Observable<string> => scan(config.settings.core.scan.application);
 
-export default iif(
-    () => !!environment().takeOnly,
-    scanForApplicationFiles.pipe(take(environment().takeOnly)),
-    scanForApplicationFiles
+export const getObservable = (): Observable<IApplicationFile[]> => iif(
+    () => environment.isCollectOnly,
+    scanForApplicationFiles().pipe(take(environment.collectOnly)),
+    scanForApplicationFiles()
 ).pipe(
     map(getFile),
     tap(debugFile),

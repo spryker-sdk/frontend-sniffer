@@ -1,7 +1,7 @@
 import { basename, dirname } from 'path';
-import { IFile } from '../shared/file';
-import { IParsedFile, IParserOutput } from '../shared/parser/base';
-import { parse, ISassApi } from '../shared/parser/sass';
+import { IFile } from '../file';
+import { IParsedFile, IParserOutput } from '../parsers/base';
+import { parse, ISassApi } from '../parsers/sass';
 
 export enum EStyleType {
     Setting = 'setting',

@@ -1,27 +1,43 @@
-import { map, concatMap, flatMap, toArray, single, tap } from 'rxjs/operators';
-import { createRuleTester, loadRule } from './rule';
-import { printHeading, printRuleOutcome, printEvaluation } from './log';
-import { getObservable as getCollectorObservable, parseCollectorObservableOutput, ICollectorOutput } from '../collector';
-import settings from '../settings';
-import { scan } from '../shared/scanner';
+import { map, concatMap, flatMap, toArray, single, tap, filter } from 'rxjs/operators';
+import { createRuleTester, loadRule, IRule } from './rule';
+import { printRuleOutcome, printEvaluation } from './log';
+import { collect, ICollectorOutput } from '../collector';
+import { config } from './config';
+import { scan } from '../scanner';
 import { TestOutcome } from './test-outcome';
 import { performEvaluation, IEvaluation } from './evaluator';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { info, createDebugger, warn } from '../log';
 
-const { dirs, patterns, options } = settings.sniffer.rules;
+const debugRule = createDebugger<IRule>('Loading rule', 'name');
 
-export const getObservable = (): Observable<IEvaluation> => getCollectorObservable().pipe(
-    map(parseCollectorObservableOutput),
-    tap(printHeading),
-    concatMap((output: ICollectorOutput) => scan(dirs, patterns, options).pipe(
+export const isEnabled = (rule: IRule): boolean => {
+    const enabled = config.settings.enabledRules.includes(rule.name);
+
+    if (!enabled) {
+        warn.print('Rule', rule.name, 'disabled');
+    }
+
+    return enabled;
+}
+
+function testRules(output: ICollectorOutput): Observable<TestOutcome> {
+    info.print('\nRunning sniffer...');
+    config.load();
+
+    return scan(config.settings.scan).pipe(
         map(loadRule),
+        tap(debugRule),
+        filter(isEnabled),
         flatMap(createRuleTester(output))
-    )),
+    )
+}
+
+export const sniff = (): Promise<IEvaluation> => new Promise<IEvaluation>((resolve) => from(collect()).pipe(
+    concatMap(testRules),
     tap(printRuleOutcome),
     toArray<TestOutcome>(),
     map(performEvaluation),
     tap(printEvaluation),
     single()
-)
-
-export default (): Promise<IEvaluation> => new Promise<IEvaluation>((resolve) => getObservable().subscribe(resolve))
+).subscribe(resolve))
