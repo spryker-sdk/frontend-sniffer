@@ -60,14 +60,9 @@ const createScanConfig = (dirs) => ({
 })
 
 exports.core = {
-    scan: createScanConfig([
-        './vendor/spryker-shop',
-        './vendor/spryker/spryker-shop'
-    ])
+    scan: createScanConfig(['./'])
 }
 
 exports.project = {
-    scan: createScanConfig([
-        './src/Pyz/Yves'
-    ])
+    scan: createScanConfig(['./'])
 }

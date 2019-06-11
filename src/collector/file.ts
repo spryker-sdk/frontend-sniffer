@@ -23,6 +23,6 @@ export function getFile(path: string): IFile {
         exists: true,
         name: basename(path),
         path,
-        relativePath: path.replace(environment.projectPath, '')
+        relativePath: path.replace(environment.path, '')
     }
 }

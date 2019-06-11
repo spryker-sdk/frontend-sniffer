@@ -16,15 +16,15 @@ export class Config<T> {
     }
 
     load(): void {
-        const projectPath = join(environment.projectPath, this.filename);
+        const path = join(environment.path, this.filename);
         const currentPath = join(process.cwd(), this.filename);
-        const defaultPath = join(__dirname, '../config', this.filename);
+        const defaultPath = join(__dirname, '../', this.filename);
         this.loaded = true;
 
-        if (existsSync(projectPath)) {
+        if (existsSync(path)) {
             log.print(`Using project configuration for ${bold(this.target)}`);
-            debug.print('Configuration path:', projectPath);
-            this.config = require(projectPath) as T;
+            debug.print('Configuration path:', path);
+            this.config = require(path) as T;
             return;
         }
 

@@ -11,7 +11,7 @@ export interface IScanSettings {
     options: Options
 }
 
-const getFullPath = (dir: string): string => isAbsolute(dir) ? dir : join(environment.projectPath, dir)
+const getFullPath = (dir: string): string => isAbsolute(dir) ? dir : join(environment.path, dir)
 const createOptionsFor = (dir: string, options: Options): Options => ({ ...options, cwd: dir })
 
 export function scan(settings: IScanSettings): Observable<string> {

@@ -4,7 +4,7 @@ import { log, error, debug } from './log';
 import { bold } from 'colors';
 
 interface IEnvironment {
-    projectPath: string
+    path: string
     excludeSniffer: boolean
     collectOnly: number
     debugMode: boolean
@@ -12,33 +12,33 @@ interface IEnvironment {
 
 export class Environment {
     protected variables: IEnvironment = {
-        projectPath: process.cwd(),
+        path: process.cwd(),
         excludeSniffer: false,
         collectOnly: null,
         debugMode: false
     }
 
     protected check(): boolean {
-        if (!this.variables.projectPath) {
-            error.print('Enviroment variable "projectPath" is not set');
+        if (!this.variables.path) {
+            error.print('Enviroment variable "path" is not set');
             return false;
         }
 
-        if (!existsSync(this.variables.projectPath)) {
-            error.print(`Enviroment variable "projectPath" is set but its value does not exist in the filesystem:\n${this.variables.projectPath}`);
+        if (!existsSync(this.variables.path)) {
+            error.print(`Enviroment variable "path" is set but its value does not exist in the filesystem:\n${this.variables.path}`);
             return false;
         }
 
-        log.print(`Project path:\n${bold(this.variables.projectPath)}`);
+        log.print(`Target path: ${bold(this.variables.path)}`);
         return true;
     }
 
     protected convertToFullProjectPath(): void {
-        if (isAbsolute(this.variables.projectPath)) {
+        if (isAbsolute(this.variables.path)) {
             return;
         }
 
-        this.variables.projectPath = resolve(this.variables.projectPath);
+        this.variables.path = resolve(this.variables.path);
     }
 
     update(variables: Partial<IEnvironment>): boolean {
@@ -53,8 +53,8 @@ export class Environment {
         return this.check();
     }
 
-    get projectPath(): string {
-        return this.variables.projectPath;
+    get path(): string {
+        return this.variables.path;
     }
 
     get excludeSniffer(): boolean {

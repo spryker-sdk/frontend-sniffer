@@ -39,14 +39,14 @@ try {
 
     program
         .version(version, '-v, --version')
-        .option('-p, --project-path [path]', 'set the target project [path]', process.cwd())
+        .option('-p, --path [path]', 'set the target [path]', process.cwd())
         .option('-e, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
         .option('-c, --collect-only [n]', 'collect only the first [n] elements for each stream', null)
         .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
         .parse(process.argv);
 
     const isValid = environment.update({
-        projectPath: program.projectPath,
+        path: program.path,
         excludeSniffer: program.excludeSniffer,
         collectOnly: program.collectOnly,
         debugMode: program.debugMode
