@@ -28,7 +28,7 @@ export class Config<T> {
             return;
         }
 
-        if (existsSync(currentPath)) {
+        if (currentPath !== defaultPath && existsSync(currentPath)) {
             log.print(`Using custom configuration for ${bold(this.target)}`);
             debug.print('Configuration path:', currentPath);
             this.config = require(currentPath) as T;

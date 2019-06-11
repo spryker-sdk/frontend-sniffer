@@ -19,4 +19,4 @@ export interface ICollectorConfig {
     }
 }
 
-export const config = new Config<ICollectorConfig>('collector', 'frontend-sniffer.collector.config');
+export const config = new Config<ICollectorConfig>('collector', 'frontend-sniffer.collector.config.js');

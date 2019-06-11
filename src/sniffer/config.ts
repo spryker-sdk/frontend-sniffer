@@ -6,4 +6,4 @@ export interface ISnifferConfig {
     enabledRules: string[]
 }
 
-export const config = new Config<ISnifferConfig>('sniffer', 'frontend-sniffer.config');
+export const config = new Config<ISnifferConfig>('sniffer', 'frontend-sniffer.config.js');
