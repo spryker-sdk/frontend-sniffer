@@ -1,4 +1,4 @@
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { getObservable as getApplicationObservable } from './application';
 import { getObservable as getStylesObservable } from './styles';
 import { getObservable as getComponentsObservable } from './components';
