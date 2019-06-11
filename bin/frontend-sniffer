@@ -1,37 +1,68 @@
 #!/usr/bin/env node
 
-const program = require('commander');
-const { error } = require('../dist/log');
-const { environment, sniff, collect } = require('../api');
-const { version } = require('../package.json');
-
-const run = (fn) => {
-    fn().catch(err => !!err && error.print('Error:', err));
+const exitCode = {
+    SUCCESS: 0,
+    INVALID_ENVIRONMENT: 1,
+    SNIFFER_FAIL: 2,
+    SNIFFER_RUNTIME_ERROR: 3,
+    COLLECTOR_RUNTIME_ERROR: 4,
+    UNKNOWN_ERROR: 5
 }
 
-program
-    .version(version, '-v, --version')
-    .arguments('[project-path]')
-    .option('-p, --project-path [path]', 'set the target project [path]', process.cwd())
-    .option('-e, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
-    .option('-c, --collect-only [n]', 'collect only the first [n] elements for each stream', null)
-    .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
-    .parse(process.argv);
+process.exitCode = exitCode.SUCCESS
 
-const isValid = environment.update({
-    projectPath: program.projectPath,
-    excludeSniffer: program.excludeSniffer,
-    collectOnly: program.collectOnly,
-    debugMode: program.debugMode
-})
+try {
+    const program = require('commander');
+    const { error } = require('../dist/log');
+    const { environment, sniff, collect } = require('../api');
+    const { version } = require('../package.json');
 
-if (!isValid) {
-    process.exit();
+    const manageError = (name, code) => (err) => {
+        !!err && error.print(name, 'error:', err)
+        process.exitCode = code
+    }
+
+    const runCollector = () => {
+        collect()
+            .catch(manageError('Collector', exitCode.COLLECTOR_RUNTIME_ERROR))
+    }
+
+    const runSniffer = () => {
+        sniff()
+            .then(evaluation => {
+                if (!evaluation.isPassed) {
+                    process.exitCode = exitCode.SNIFFER_FAIL
+                }
+            })
+            .catch(manageError('Sniffer', exitCode.SNIFFER_RUNTIME_ERROR))
+    }
+
+    program
+        .version(version, '-v, --version')
+        .option('-p, --project-path [path]', 'set the target project [path]', process.cwd())
+        .option('-e, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
+        .option('-c, --collect-only [n]', 'collect only the first [n] elements for each stream', null)
+        .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
+        .parse(process.argv);
+
+    const isValid = environment.update({
+        projectPath: program.projectPath,
+        excludeSniffer: program.excludeSniffer,
+        collectOnly: program.collectOnly,
+        debugMode: program.debugMode
+    })
+
+    if (!isValid) {
+        process.exitCode = exitCode.INVALID_ENVIRONMENT
+        return
+    }
+
+    if (environment.excludeSniffer) {
+        return runCollector()
+    }
+
+    runSniffer()
+} catch (err) {
+    process.exitCode = exitCode.UNKNOWN_ERROR
+    console.error('Unknown error:', err)
 }
-
-if (environment.excludeSniffer) {
-    run(collect);
-    return;
-}
-
-run(sniff);
