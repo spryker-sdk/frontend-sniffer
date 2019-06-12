@@ -264,11 +264,11 @@ function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration):
     return VisibilityMap[visibility.kind];
 }
 
-function extractReturnValue(node: TDeclarationsVariants): string {
+function extractReturnValue(node: TDeclarationVariants): string {
     return createTypeString(node.type, extractAsync(node));
 }
 
-function extractAsync(node: TDeclarationsVariants): boolean {
+function extractAsync(node: TDeclarationVariants): boolean {
     if (!node.modifiers) {
         return false;
     }
