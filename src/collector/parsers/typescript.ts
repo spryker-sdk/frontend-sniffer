@@ -73,7 +73,7 @@ const isNot = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind !==
 const merge = (a: any, b: any): any => [...a, ...b];
 const isVisibility = (node: ts.Modifier): boolean => !!VisibilityMap[node.kind];
 const isReadonly = (node: ts.PropertyDeclaration): boolean => !!node.modifiers &&
-    Boolean(node.modifiers.filter(node => node.kind === ts.SyntaxKind.ReadonlyKeyword).length);
+    !!node.modifiers.filter(node => node.kind === ts.SyntaxKind.ReadonlyKeyword).length;
 const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
