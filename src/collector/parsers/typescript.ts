@@ -44,7 +44,7 @@ export interface IProperty {
     isReadonly: boolean
 }
 
-export type TDeclarationsVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration
+export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration
 
 export interface ITypescriptApi {
     classes: IClass[]
