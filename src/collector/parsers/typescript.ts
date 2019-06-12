@@ -36,13 +36,26 @@ export interface IClass {
     accessors: any
 }
 
+export interface IProperty {
+    name: string,
+    description: string,
+    returnType: string,
+    visibility: string,
+    isReadonly: boolean
+}
+
+export type TDeclarationsVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration
+
 export interface ITypescriptApi {
     classes: IClass[]
     functions: IFunction[]
+    property: IProperty[]
 }
 
 export const VisibilityMap = {
-    [ts.SyntaxKind.PublicKeyword]: 'public'
+    [ts.SyntaxKind.PublicKeyword]: 'public',
+    [ts.SyntaxKind.ProtectedKeyword]: 'protected',
+    [ts.SyntaxKind.PrivateKeyword]: 'private'
 }
 
 export const BaseTypeMap = {
@@ -59,6 +72,8 @@ const is = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind === ki
 const isNot = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind !== kind;
 const merge = (a: any, b: any): any => [...a, ...b];
 const isVisibility = (node: ts.Modifier): boolean => !!VisibilityMap[node.kind];
+const isReadonly = (node: ts.PropertyDeclaration): boolean => !!node.modifiers &&
+    Boolean(node.modifiers.filter(node => node.kind === ts.SyntaxKind.ReadonlyKeyword).length);
 const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
@@ -183,6 +198,16 @@ function createClass(node: ts.ClassDeclaration): IClass {
     }
 }
 
+function createProperty(node: ts.PropertyDeclaration): IProperty {
+    return {
+        name: node.name ? node.name.getText() : '',
+        description: extractDescription(node),
+        returnType: extractReturnValue(node),
+        visibility: extractVisibility(node),
+        isReadonly: isReadonly(node)
+    }
+}
+
 function createCrawler<O, I extends ts.Node = ts.Node>(
     kind: ts.SyntaxKind,
     creator: (node: ts.Node) => O,
@@ -218,7 +243,12 @@ const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
     createClass
 );
 
-function extractVisibility(node: ts.MethodDeclaration): string {
+const crawlForProperty = createCrawler<IProperty, ts.SourceFile>(
+    ts.SyntaxKind.PropertyDeclaration,
+    createProperty
+);
+
+function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -234,11 +264,11 @@ function extractVisibility(node: ts.MethodDeclaration): string {
     return VisibilityMap[visibility.kind];
 }
 
-function extractReturnValue(node: ts.MethodDeclaration | ts.FunctionDeclaration): string {
+function extractReturnValue(node: TDeclarationsVariants): string {
     return createTypeString(node.type, extractAsync(node));
 }
 
-function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
+function extractAsync(node: TDeclarationsVariants): boolean {
     if (!node.modifiers) {
         return false;
     }
@@ -310,7 +340,8 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
             api: {
                 external: {
                     classes: crawlForClasses(sourceFile),
-                    functions: crawlForFunctions(sourceFile)
+                    functions: crawlForFunctions(sourceFile),
+                    property: crawlForProperty(sourceFile)
                 },
                 internal: null
             },
