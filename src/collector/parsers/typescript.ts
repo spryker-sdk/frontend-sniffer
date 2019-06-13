@@ -33,7 +33,7 @@ export interface IClass {
     tags: ITag[]
     properties: IProperty[]
     methods: IMethod[]
-    accessors: IAccessor
+    accessors: IAccessor[]
 }
 
 export interface IProperty {
