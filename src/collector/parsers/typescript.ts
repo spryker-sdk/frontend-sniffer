@@ -31,7 +31,7 @@ export interface IClass {
     name: string,
     description: string
     tags: ITag[]
-    properties: any
+    properties: IProperty[]
     methods: IMethod[]
     accessors: any
 }
@@ -49,7 +49,6 @@ export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration
 export interface ITypescriptApi {
     classes: IClass[]
     functions: IFunction[]
-    property: IProperty[]
 }
 
 export const VisibilityMap = {
@@ -192,7 +191,7 @@ function createClass(node: ts.ClassDeclaration): IClass {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
         tags: extractTags(node),
-        properties: null,
+        properties: crawlForProperty(node),
         methods: crawlForMethods(node),
         accessors: null
     }
@@ -243,7 +242,7 @@ const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
     createClass
 );
 
-const crawlForProperty = createCrawler<IProperty, ts.SourceFile>(
+const crawlForProperty = createCrawler<IProperty, ts.ClassDeclaration>(
     ts.SyntaxKind.PropertyDeclaration,
     createProperty
 );
@@ -340,8 +339,7 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
             api: {
                 external: {
                     classes: crawlForClasses(sourceFile),
-                    functions: crawlForFunctions(sourceFile),
-                    property: crawlForProperty(sourceFile)
+                    functions: crawlForFunctions(sourceFile)
                 },
                 internal: null
             },
