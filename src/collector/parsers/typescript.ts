@@ -28,13 +28,31 @@ export interface IMethod extends IFunction {
 }
 
 export interface IClass {
-    name: string,
+    name: string
     description: string
     tags: ITag[]
-    properties: any
+    properties: IProperty[]
     methods: IMethod[]
-    accessors: any
+    accessors: IAccessor
 }
+
+export interface IProperty {
+    name: string
+    description: string
+    returnType: string
+    visibility: string
+    isReadonly: boolean
+}
+
+export interface IAccessor {
+    name: string
+    description: string
+    returnType: string
+    parameters: IParameter[]
+    accessorType: string
+}
+
+export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration
 
 export interface ITypescriptApi {
     classes: IClass[]
@@ -42,7 +60,9 @@ export interface ITypescriptApi {
 }
 
 export const VisibilityMap = {
-    [ts.SyntaxKind.PublicKeyword]: 'public'
+    [ts.SyntaxKind.PublicKeyword]: 'public',
+    [ts.SyntaxKind.ProtectedKeyword]: 'protected',
+    [ts.SyntaxKind.PrivateKeyword]: 'private'
 }
 
 export const AccessorsMap = {
@@ -64,6 +84,8 @@ const is = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind === ki
 const isNot = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind !== kind;
 const merge = (a: any, b: any): any => [...a, ...b];
 const isVisibility = (node: ts.Modifier): boolean => !!VisibilityMap[node.kind];
+const isReadonly = (node: ts.PropertyDeclaration): boolean => !!node.modifiers &&
+    !!node.modifiers.filter(node => node.kind === ts.SyntaxKind.ReadonlyKeyword).length;
 const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
@@ -159,7 +181,7 @@ function createParameter(node: ts.ParameterDeclaration, jsDocNode: ts.JSDocParam
     };
 }
 
-function createFunction(node: any): IFunction {
+function createFunction(node: ts.FunctionDeclaration): IFunction {
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
@@ -183,19 +205,29 @@ function createClass(node: ts.ClassDeclaration): IClass {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
         tags: extractTags(node),
-        properties: null,
+        properties: crawlForProperty(node),
         methods: crawlForMethods(node),
         accessors: merge(crawlForGetAccessors(node), crawlForSetAccessors(node))
     }
 }
 
-function createAccessors(node: ts.AccessorDeclaration): any {
+function createAccessors(node: ts.AccessorDeclaration): IAccessor {
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
         parameters: extractParameters(node),
         returnType: extractReturnValue(node),
         accessorType: AccessorsMap[node.kind]
+    }
+}
+
+function createProperty(node: ts.PropertyDeclaration): IProperty {
+    return {
+        name: node.name ? node.name.getText() : '',
+        description: extractDescription(node),
+        returnType: extractReturnValue(node),
+        visibility: extractVisibility(node),
+        isReadonly: isReadonly(node)
     }
 }
 
@@ -234,17 +266,22 @@ const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
     createClass
 );
 
-const crawlForGetAccessors = createCrawler<any, ts.ClassDeclaration>(
+const crawlForProperty = createCrawler<IProperty, ts.ClassDeclaration>(
+    ts.SyntaxKind.PropertyDeclaration,
+    createProperty
+);
+
+const crawlForGetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.GetAccessor,
     createAccessors
 );
 
-const crawlForSetAccessors = createCrawler<any, ts.ClassDeclaration>(
+const crawlForSetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.SetAccessor,
     createAccessors
 );
 
-function extractVisibility(node: ts.MethodDeclaration): string {
+function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -260,11 +297,11 @@ function extractVisibility(node: ts.MethodDeclaration): string {
     return VisibilityMap[visibility.kind];
 }
 
-function extractReturnValue(node: ts.MethodDeclaration | ts.FunctionDeclaration): string {
+function extractReturnValue(node: TDeclarationVariants): string {
     return createTypeString(node.type, extractAsync(node));
 }
 
-function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
+function extractAsync(node: TDeclarationVariants): boolean {
     if (!node.modifiers) {
         return false;
     }
@@ -274,7 +311,7 @@ function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): bool
         .find(is(ts.SyntaxKind.AsyncKeyword));
 }
 
-function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IParameter[] {
+function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.AccessorDeclaration): IParameter[] {
     const parameterTags = <ts.JSDocParameterTag[]>ts
         .getAllJSDocTagsOfKind(node, ts.SyntaxKind.JSDocParameterTag);
 
