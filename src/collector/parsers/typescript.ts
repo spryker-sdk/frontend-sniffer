@@ -45,6 +45,11 @@ export const VisibilityMap = {
     [ts.SyntaxKind.PublicKeyword]: 'public'
 }
 
+export const AccessorsMap = {
+    [ts.SyntaxKind.GetAccessor]: 'get',
+    [ts.SyntaxKind.SetAccessor]: 'set'
+}
+
 export const BaseTypeMap = {
     [ts.SyntaxKind.VoidKeyword]: 'void',
     [ts.SyntaxKind.NullKeyword]: 'null',
@@ -154,7 +159,7 @@ function createParameter(node: ts.ParameterDeclaration, jsDocNode: ts.JSDocParam
     };
 }
 
-function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IFunction {
+function createFunction(node: any): IFunction {
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
@@ -173,13 +178,24 @@ function createMethod(node: ts.MethodDeclaration): IMethod {
 }
 
 function createClass(node: ts.ClassDeclaration): IClass {
+    console.log(merge(crawlForGetAccessors(node), crawlForSetAccessors(node)));
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
         tags: extractTags(node),
         properties: null,
         methods: crawlForMethods(node),
-        accessors: null
+        accessors: merge(crawlForGetAccessors(node), crawlForSetAccessors(node))
+    }
+}
+
+function createAccessors(node: ts.AccessorDeclaration): any {
+    return {
+        name: node.name ? node.name.getText() : '',
+        description: extractDescription(node),
+        parameters: extractParameters(node),
+        returnType: extractReturnValue(node),
+        accessorType: AccessorsMap[node.kind]
     }
 }
 
@@ -216,6 +232,16 @@ const crawlForMethods = createCrawler<IMethod, ts.ClassDeclaration>(
 const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
     ts.SyntaxKind.ClassDeclaration,
     createClass
+);
+
+const crawlForGetAccessors = createCrawler<any, ts.ClassDeclaration>(
+    ts.SyntaxKind.GetAccessor,
+    createAccessors
+);
+
+const crawlForSetAccessors = createCrawler<any, ts.ClassDeclaration>(
+    ts.SyntaxKind.SetAccessor,
+    createAccessors
 );
 
 function extractVisibility(node: ts.MethodDeclaration): string {
