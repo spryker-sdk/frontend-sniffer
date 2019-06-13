@@ -1,10 +1,16 @@
-import { TestOutcome } from './test-outcome';
-import { log, info, success, warn, error } from '../log';
+import { TestOutcome, TestResult } from './test-outcome';
+import { log, success, warn, error } from '../logger';
 import { IEvaluation } from './evaluator';
 import { bold } from 'colors';
 
+const resultLogMap = {
+    [TestResult.SUCCEDED]: success,
+    [TestResult.SUCCEDED_WITH_WARNINGS]: warn,
+    [TestResult.FAILED]: error
+}
+
 export function printRuleOutcome(outcome: TestOutcome): TestOutcome {
-    log.print(`Rule ${outcome.name} ${bold(outcome.result)}`);
+    resultLogMap[outcome.result].print(`Rule ${outcome.name} ${bold(outcome.result)}`);
     outcome.logs.forEach((message: string) => log.print(message));
     outcome.warnings.forEach((message: string) => warn.print(message));
     outcome.errors.forEach((message: string) => error.print(message));

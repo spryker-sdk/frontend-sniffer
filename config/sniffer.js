@@ -3,7 +3,7 @@ const { join } = require('path');
 module.exports = {
     scan: {
         dirs: [
-            join(__dirname, './rules'),
+            join(__dirname, '../rules'),
         ],
         patterns: [
             '*.js'
@@ -16,9 +16,5 @@ module.exports = {
         }
     },
 
-    enabledRules: [
-        'dummy',
-        'mandatory-readme',
-        'deprecation-warning'
-    ]
+    skip: []
 }

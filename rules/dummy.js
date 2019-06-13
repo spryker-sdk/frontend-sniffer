@@ -1,4 +1,9 @@
-const { TestOutcome } = require('../api');
+const { Rule } = require('../api');
 
-const name = exports.name = 'dummy';
-exports.test = async (data) => new TestOutcome(name);
+module.exports = class extends Rule {
+    getName() {
+        return 'dummy';
+    }
+
+    test(data) { }
+}

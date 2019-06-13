@@ -2,11 +2,11 @@
 
 const exitCode = {
     SUCCESS: 0,
-    INVALID_ENVIRONMENT: 1,
-    SNIFFER_FAIL: 2,
-    SNIFFER_RUNTIME_ERROR: 3,
-    COLLECTOR_RUNTIME_ERROR: 4,
-    UNKNOWN_ERROR: 5
+    UNKNOWN_ERROR: 1,
+    INVALID_ENVIRONMENT: 10,
+    SNIFFER_FAIL: 11,
+    SNIFFER_RUNTIME_ERROR: 12,
+    COLLECTOR_RUNTIME_ERROR: 13
 }
 
 process.exitCode = exitCode.SUCCESS
@@ -39,16 +39,18 @@ try {
 
     program
         .version(version, '-v, --version')
-        .option('-p, --path [path]', 'set the target [path]', process.cwd())
-        .option('-e, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
-        .option('-c, --collect-only [n]', 'collect only the first [n] elements for each stream', null)
+        .option('-p, --path [path]', 'set the path for the collector to run', process.cwd())
+        .option('-c, --config-path [config-path]', 'set the configuration path', '')
+        .option('-x, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
+        .option('-o, --only [n]', 'collect only the first [n] elements for each stream', null)
         .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
         .parse(process.argv);
 
     const isValid = environment.update({
         path: program.path,
+        configPath: program.configPath,
         excludeSniffer: program.excludeSniffer,
-        collectOnly: program.collectOnly,
+        only: program.only,
         debugMode: program.debugMode
     })
 

@@ -5,7 +5,7 @@ import { getObservable as getComponentsObservable } from './components';
 import { IApplicationFile } from './application/parser';
 import { IStyleFile } from './styles/parser';
 import { IParsedComponent } from './components/parser';
-import { info } from '../log';
+import { info } from '../logger';
 import { config } from './config';
 
 export type TCollectorObservableOutput = [IApplicationFile[], IStyleFile[], IParsedComponent[]];
@@ -18,7 +18,6 @@ export interface ICollectorOutput {
 
 export const collect = (): Promise<ICollectorOutput> => new Promise<ICollectorOutput>((resolve, reject) => {
     info.print('\nRunning collector...');
-    config.load();
 
     return combineLatest(
         getApplicationObservable(),

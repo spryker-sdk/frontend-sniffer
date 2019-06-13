@@ -1,44 +1,75 @@
-import { existsSync } from 'fs';
+import { existsSync, statSync } from 'fs';
 import { join } from 'path';
-import { log, debug } from './log';
+import { merge } from 'lodash';
+import { log, debug } from './logger';
 import { environment } from './environment';
 import { bold } from 'colors';
 
 export class Config<T> {
     protected config: T = null
-    protected readonly target: string
+    protected readonly targetName: string
     protected readonly filename: string
+    protected readonly defaultConfigPath: string
+    protected readonly defaultConfig: T
     protected loaded: boolean = false
 
-    constructor(target: string, filename: string) {
-        this.target = target;
+    constructor(targetName: string, filename: string) {
+        this.targetName = targetName;
         this.filename = filename;
+        this.defaultConfigPath = join(__dirname, '../config', this.targetName);
+        this.defaultConfig = require(this.defaultConfigPath);
     }
 
-    load(): void {
-        const path = join(environment.path, this.filename);
-        const currentPath = join(process.cwd(), this.filename);
-        const defaultPath = join(__dirname, '../', this.filename);
+    protected load(): void {
+        const paths = [
+            environment.configPath && environment.configPath,
+            environment.configPath && join(environment.configPath, this.filename),
+            join(environment.path, this.filename),
+            join(process.cwd(), this.filename)
+        ]
+
+        paths.map((path: string) => this.loadConfigFromPath(path));
+        this.loadDefaultConfig();
+    }
+
+    protected loadDefaultConfig(): void {
+        if (this.loaded) {
+            return;
+        }
+
+        this.config = this.defaultConfig;
         this.loaded = true;
+        log.print(`Configuration for ${this.targetName}:`, bold('default'));
+    }
 
-        if (existsSync(path)) {
-            log.print(`Using project configuration for ${bold(this.target)}`);
-            debug.print('Configuration path:', path);
-            this.config = require(path) as T;
+    protected loadConfigFromPath(path: string): void {
+        if (this.loaded) {
             return;
         }
 
-        if (currentPath !== defaultPath && existsSync(currentPath)) {
-            log.print(`Using custom configuration for ${bold(this.target)}`);
-            debug.print('Configuration path:', currentPath);
-            this.config = require(currentPath) as T;
+        debug.print('Trying to load configuration from', path);
+
+        if (this.isDefaultConfigPath(path) || !this.exists(path)) {
             return;
         }
 
-        log.print(`Using default configuration for ${bold(this.target)}`);
-        debug.print('Configuration path:', defaultPath);
-        this.config = require(defaultPath) as T;
-        return;
+        const config = require(path) as T;
+        this.config = merge(this.defaultConfig, config);
+        this.loaded = true;
+        log.print(`Configuration for ${this.targetName}:`, bold(path));
+    }
+
+    protected isDefaultConfigPath(path: string): boolean {
+        return path === this.defaultConfigPath;
+    }
+
+    protected exists(path: string): boolean {
+        if (!existsSync(path)) {
+            return false;
+        }
+
+        const stats = statSync(path);
+        return stats.isFile();
     }
 
     get settings(): T {

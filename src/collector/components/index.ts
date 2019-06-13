@@ -5,7 +5,7 @@ import { getComponent, IComponent } from './component';
 import { printParsedComponentLog } from './log';
 import { config } from '../config';
 import { scan } from '../../scanner';
-import { createDebugger, createLogger } from '../../log';
+import { createDebugger, createLogger } from '../../logger';
 import { environment } from '../../environment';
 
 const debugComponent = createDebugger<IComponent>('Collecting component', 'namespace', 'module', 'type', 'name');
@@ -13,8 +13,8 @@ const logCollection = createLogger<IParsedComponent[]>('Components:', 'length');
 const scanForComponents = (): Observable<string> => scan(config.settings.core.scan.components);
 
 export const getObservable = (): Observable<IParsedComponent[]> => iif(
-    () => environment.isCollectOnly,
-    scanForComponents().pipe(take(environment.collectOnly)),
+    () => environment.isOnly,
+    scanForComponents().pipe(take(environment.only)),
     scanForComponents()
 ).pipe(
     map(getComponent),

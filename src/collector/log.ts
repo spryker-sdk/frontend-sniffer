@@ -1,4 +1,4 @@
-import { log, info, warn, error, ILogger } from '../log';
+import { log, info, warn, error, ILogger } from '../logger';
 import { IParsedFile } from './parsers/base';
 import { environment } from '../environment';
 

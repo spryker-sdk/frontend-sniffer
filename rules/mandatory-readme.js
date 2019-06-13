@@ -1,18 +1,18 @@
 const { dim, bold } = require('colors');
-const { TestOutcome } = require('../api');
+const { Rule } = require('../api');
 
-const name = exports.name = 'mandatory-readme';
+module.exports = class extends Rule {
+    getName() {
+        return 'mandatory-readme';
+    }
 
-exports.test = async (data) => {
-    const result = new TestOutcome(name);
+    test(data) {
+        data.components.forEach(component => {
+            if (component.files.readme.exists) {
+                return;
+            }
 
-    data.components.forEach(component => {
-        if (component.files.readme.exists) {
-            return;
-        }
-
-        result.addError(`README.md missing in ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
-    });
-
-    return result;
+            this.outcome.addError(`README.md missing in ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
+        });
+    }
 }

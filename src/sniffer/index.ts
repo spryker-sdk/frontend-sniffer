@@ -1,5 +1,5 @@
 import { map, concatMap, flatMap, toArray, single, tap, filter } from 'rxjs/operators';
-import { createRuleTester, loadRule, IRule } from './rule';
+import { runRuleTest, loadRule, ruleIsEnabled, Rule } from './rule';
 import { printRuleOutcome, printEvaluation } from './log';
 import { collect, ICollectorOutput } from '../collector';
 import { config } from './config';
@@ -7,29 +7,18 @@ import { scan } from '../scanner';
 import { TestOutcome } from './test-outcome';
 import { performEvaluation, IEvaluation } from './evaluator';
 import { Observable, from } from 'rxjs';
-import { info, createDebugger, warn } from '../log';
+import { info, createDebugger, warn } from '../logger';
 
-const debugRule = createDebugger<IRule>('Loading rule', 'name');
-
-export const isEnabled = (rule: IRule): boolean => {
-    const enabled = config.settings.enabledRules.includes(rule.name);
-
-    if (!enabled) {
-        warn.print('Rule', rule.name, 'disabled');
-    }
-
-    return enabled;
-}
+const debugRule = createDebugger<Rule>('Loading rule', 'name');
 
 function testRules(output: ICollectorOutput): Observable<TestOutcome> {
     info.print('\nRunning sniffer...');
-    config.load();
 
     return scan(config.settings.scan).pipe(
         map(loadRule),
+        filter(ruleIsEnabled),
         tap(debugRule),
-        filter(isEnabled),
-        flatMap(createRuleTester(output))
+        flatMap(runRuleTest(output))
     )
 }
 

@@ -1,15 +1,15 @@
-const { TestOutcome } = require('../api');
+const { Rule } = require('../api');
 
-const name = exports.name = 'deprecation-warning';
+module.exports = class extends Rule {
+    getName() {
+        return 'deprecation-warning';
+    }
 
-exports.test = async (data) => {
-    const result = new TestOutcome(name);
-
-    data.components.forEach(component => {
-        if (component.isDeprecated) {
-            result.addWarning(`${component.name} is deprecated`);
-        }
-    });
-
-    return result;
+    test(data) {
+        data.components.forEach(component => {
+            if (component.isDeprecated) {
+                this.outcome.addWarning(`${component.name} is deprecated`);
+            }
+        });
+    }
 }
