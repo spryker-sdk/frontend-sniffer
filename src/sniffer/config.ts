@@ -3,7 +3,7 @@ import { Config } from '../config';
 
 export interface ISnifferConfig {
     scan: IScanSettings
-    skip: string[]
+    enable: string[]
 }
 
 export const config = new Config<ISnifferConfig>('sniffer', 'frontend-sniffer.config.js');

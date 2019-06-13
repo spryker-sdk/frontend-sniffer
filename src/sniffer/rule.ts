@@ -1,7 +1,7 @@
 import { TestOutcome } from './test-outcome';
 import { ICollectorOutput } from '../collector';
 import { config } from './config';
-import { log } from '../logger';
+import { debug } from '../logger';
 
 export abstract class Rule {
     readonly outcome: TestOutcome
@@ -11,7 +11,7 @@ export abstract class Rule {
     }
 
     get isSkipped(): boolean {
-        return !config.settings.skip.includes(this.getName());
+        return config.settings.enable.includes(this.getName());
     }
 
     abstract getName(): string
@@ -28,7 +28,7 @@ export const ruleIsEnabled = (rule: Rule): boolean => {
         return true;
     }
 
-    log.print('Rule', rule.getName(), 'skipped');
+    debug.print('Rule', rule.getName(), 'not enabled');
     return false;
 }
 
