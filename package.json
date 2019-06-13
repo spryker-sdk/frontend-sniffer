@@ -10,8 +10,7 @@
     "postinstall": "tsc -p .",
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
-    "sniff": "node .",
-    "collect": "node . -c"
+    "sniff": "node ."
   },
   "dependencies": {
     "@types/lodash": "^4.14.133",
