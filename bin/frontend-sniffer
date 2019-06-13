@@ -13,7 +13,7 @@ process.exitCode = exitCode.SUCCESS
 
 try {
     const program = require('commander');
-    const { error } = require('../dist/log');
+    const { error } = require('../dist/logger');
     const { environment, sniff, collect } = require('../api');
     const { version } = require('../package.json');
 
