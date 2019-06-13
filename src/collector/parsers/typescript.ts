@@ -181,7 +181,7 @@ function createParameter(node: ts.ParameterDeclaration, jsDocNode: ts.JSDocParam
     };
 }
 
-function createFunction(node: ts.FunctionDeclaration): IFunction {
+function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IFunction {
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
@@ -200,7 +200,6 @@ function createMethod(node: ts.MethodDeclaration): IMethod {
 }
 
 function createClass(node: ts.ClassDeclaration): IClass {
-    console.log(merge(crawlForGetAccessors(node), crawlForSetAccessors(node)));
     return {
         name: node.name ? node.name.getText() : '',
         description: extractDescription(node),
