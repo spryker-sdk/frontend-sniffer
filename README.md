@@ -173,7 +173,7 @@ if (!isValid) {
 }
 
 sniff()
-    .then(output => {
+    .then(evaluation => {
         //your code
     })
     .catch(err => {
@@ -213,15 +213,15 @@ module.exports = class extends Rule {
 This is the current roadmap of feature that will be progressively enabled before v1 goes
 live. Some of them are in current development.
 
-[x] Core components collector
-[x] Core global application files collector
-[x] Core global styles collector
-[x] Sniffer engine
-[x] Sniffer rules implementation
-[] Sniffer full ruleset
-[x] Travis integration
-[] Components previews
-[] Styles previews
-[] Project components collector
-[] Project global application files collector
-[] Project global styles collector
+- [x] Core components collector
+- [x] Core global application files collector
+- [x] Core global styles collector
+- [x] Sniffer engine
+- [x] Sniffer rules implementation
+- [ ] Sniffer full ruleset
+- [x] Travis integration
+- [ ] Components previews
+- [ ] Styles previews
+- [ ] Project components collector
+- [ ] Project global application files collector
+- [ ] Project global styles collector
