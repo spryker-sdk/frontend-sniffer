@@ -90,6 +90,8 @@ const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
+const mergeAccessors = (node: ts.ClassDeclaration): IAccessor[] =>
+    merge(crawlForGetAccessors(node), crawlForSetAccessors(node));
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -206,7 +208,7 @@ function createClass(node: ts.ClassDeclaration): IClass {
         tags: extractTags(node),
         properties: crawlForProperty(node),
         methods: crawlForMethods(node),
-        accessors: merge(crawlForGetAccessors(node), crawlForSetAccessors(node))
+        accessors: mergeAccessors(node)
     }
 }
 
