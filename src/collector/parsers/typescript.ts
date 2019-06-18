@@ -28,23 +28,31 @@ export interface IMethod extends IFunction {
 }
 
 export interface IClass {
-    name: string,
+    name: string
     description: string
     tags: ITag[]
     properties: IProperty[]
     methods: IMethod[]
-    accessors: any
+    accessors: IAccessor[]
 }
 
 export interface IProperty {
-    name: string,
-    description: string,
-    returnType: string,
-    visibility: string,
+    name: string
+    description: string
+    returnType: string
+    visibility: string
     isReadonly: boolean
 }
 
-export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration
+export interface IAccessor {
+    name: string
+    description: string
+    returnType: string
+    parameters: IParameter[]
+    accessorType: string
+}
+
+export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration
 
 export interface ITypescriptApi {
     classes: IClass[]
@@ -55,6 +63,11 @@ export const VisibilityMap = {
     [ts.SyntaxKind.PublicKeyword]: 'public',
     [ts.SyntaxKind.ProtectedKeyword]: 'protected',
     [ts.SyntaxKind.PrivateKeyword]: 'private'
+}
+
+export const AccessorsMap = {
+    [ts.SyntaxKind.GetAccessor]: 'get',
+    [ts.SyntaxKind.SetAccessor]: 'set'
 }
 
 export const BaseTypeMap = {
@@ -77,6 +90,8 @@ const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
+const mergeAccessors = (node: ts.ClassDeclaration): IAccessor[] =>
+    merge(crawlForGetAccessors(node), crawlForSetAccessors(node));
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -193,7 +208,17 @@ function createClass(node: ts.ClassDeclaration): IClass {
         tags: extractTags(node),
         properties: crawlForProperty(node),
         methods: crawlForMethods(node),
-        accessors: null
+        accessors: mergeAccessors(node)
+    }
+}
+
+function createAccessors(node: ts.AccessorDeclaration): IAccessor {
+    return {
+        name: node.name ? node.name.getText() : '',
+        description: extractDescription(node),
+        parameters: extractParameters(node),
+        returnType: extractReturnValue(node),
+        accessorType: AccessorsMap[node.kind]
     }
 }
 
@@ -247,6 +272,16 @@ const crawlForProperty = createCrawler<IProperty, ts.ClassDeclaration>(
     createProperty
 );
 
+const crawlForGetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+    ts.SyntaxKind.GetAccessor,
+    createAccessors
+);
+
+const crawlForSetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+    ts.SyntaxKind.SetAccessor,
+    createAccessors
+);
+
 function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
@@ -277,7 +312,7 @@ function extractAsync(node: TDeclarationVariants): boolean {
         .find(is(ts.SyntaxKind.AsyncKeyword));
 }
 
-function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IParameter[] {
+function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.AccessorDeclaration): IParameter[] {
     const parameterTags = <ts.JSDocParameterTag[]>ts
         .getAllJSDocTagsOfKind(node, ts.SyntaxKind.JSDocParameterTag);
 
