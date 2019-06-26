@@ -152,9 +152,8 @@ function createTypeString(node: ts.TypeNode, extractAsync: boolean = false): str
         if (isBaseType(arrayTypeNode)) {
             BaseTypeMap[arrayTypeNode.elementType.kind] + '[]';
         }
-
         const typeReferenceNode = <ts.TypeReferenceNode>arrayTypeNode.elementType;
-        return typeReferenceNode.typeName.getText() + '[]';
+        return typeReferenceNode.getText() + '[]';
     }
 
     if (is(ts.SyntaxKind.UnionType)(node)) {
