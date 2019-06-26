@@ -5,10 +5,11 @@ import { bold } from 'colors';
 
 interface IEnvironment {
     path: string
-    configPath: string,
+    configPath: string
     excludeSniffer: boolean
     only: number
     debugMode: boolean
+    levelRestriction: 'project' | 'vendor'
 }
 
 export class Environment {
@@ -17,7 +18,8 @@ export class Environment {
         configPath: process.cwd(),
         excludeSniffer: false,
         only: null,
-        debugMode: false
+        debugMode: false,
+        levelRestriction: null
     }
 
     protected check(): boolean {
@@ -79,6 +81,17 @@ export class Environment {
 
     get debugMode(): boolean {
         return this.variables.debugMode;
+    }
+
+    get isAllowedLevel(): boolean {
+        const allowedLevelsPaths = ['project', 'vendor'];
+        const requestedLevel = this.variables.levelRestriction;
+
+        return allowedLevelsPaths.some(level => requestedLevel === level);
+    }
+
+    get levelRestriction(): 'project' | 'vendor' {
+        return this.variables.levelRestriction;
     }
 }
 
