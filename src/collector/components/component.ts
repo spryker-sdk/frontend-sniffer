@@ -29,7 +29,7 @@ export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S 
 }
 
 function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: string[]) {
-    const twigFileNameInComponent = directoryFiles.filter(fileName => fileName.indexOf('.twig') >= 0)[0];
+    const twigFileNameInComponent = directoryFiles.filter(fileName => fileName.includes('.twig'))[0];
     if (!directoryFiles.includes(defaultFileName) && twigFileNameInComponent) {
         return twigFileNameInComponent;
     }
@@ -39,7 +39,7 @@ function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: str
 
 function extractCorrectScssFileName(defaultFileName: string, directoryFiles: string[]) {
     const scssFileNameInComponent = directoryFiles.filter(fileName =>
-        fileName.indexOf('.scss') >= 0 && fileName !== 'style.scss'
+        fileName.includes('.scss') && fileName !== 'style.scss'
     )[0];
 
     if (!directoryFiles.includes(defaultFileName) && scssFileNameInComponent) {
@@ -51,7 +51,7 @@ function extractCorrectScssFileName(defaultFileName: string, directoryFiles: str
 
 function extractCorrectScriptFileName(defaultFileName: string, directoryFiles: string[]) {
     const scriptFileNameInComponent = directoryFiles.filter(fileName =>
-        fileName.indexOf('.ts') >= 0 && fileName !== 'index.ts'
+        fileName.includes('.ts') && fileName !== 'index.ts'
     )[0];
 
     if (!directoryFiles.includes(defaultFileName) && scriptFileNameInComponent) {

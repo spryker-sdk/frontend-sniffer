@@ -63,8 +63,13 @@ module.exports = class extends Rule {
     }
 
     checkTypescriptFile(component) {
+        if (!component.files.typescript.api.external) {
+            return
+        };
+
         const { typescript } = component.files;
-        const { classes } = typescript.api.external;
+        const { external } = typescript.api;
+        const { classes } = external;
         const {name: typescriptFileName} = typescript;
         const { type, name, path } = component;
 
