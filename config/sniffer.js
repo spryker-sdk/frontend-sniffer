@@ -16,5 +16,8 @@ module.exports = {
         }
     },
 
-    enable: []
+    enable: [
+        'deprecation-warning',
+        'mandatory-readme'
+    ]
 }

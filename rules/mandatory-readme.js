@@ -1,5 +1,5 @@
 const { dim, bold } = require('colors');
-const { Rule } = require('../api');
+const { Rule, parseOutputFieldHelper } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -7,7 +7,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
+        parseOutputFieldHelper(data.components).forEach(component => {
             if (component.files.readme.exists) {
                 return;
             }
