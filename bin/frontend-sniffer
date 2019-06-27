@@ -44,7 +44,7 @@ try {
         .option('-x, --exclude-sniffer', 'run only the collector, excluding the sniffer', false)
         .option('-o, --only [n]', 'collect only the first [n] elements for each stream', null)
         .option('-d, --debug-mode', 'run in debug mode (verbose)', false)
-        .option('-l, --level-restriction [level]', 'collect vendor level only', null)
+        .option('-l, --level-restriction [level]', 'collect vendor or project level only', null)
         .parse(process.argv);
 
     const isValid = environment.update({
