@@ -208,7 +208,8 @@ function extractMixin(mixinNode: any, parentNode: any): any {
         comment,
         name,
         arguments: args,
-        hasContent
+        tree: mixinNode,
+        hasContent,
     }
 }
 
