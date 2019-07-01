@@ -201,19 +201,17 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
 function createMethod(isInternal = false) {
     return function (node: ts.MethodDeclaration): IMethod {
         const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
+        const methodOutput = {
+            ...createFunction(node),
+            visibility: extractVisibility(node)
+        };
 
         if (!isInternal && isPublicMethod) {
-            return {
-                ...createFunction(node),
-                visibility: extractVisibility(node)
-            }
+            return methodOutput;
         }
 
         if (isInternal && !isPublicMethod) {
-            return {
-                ...createFunction(node),
-                visibility: extractVisibility(node)
-            }
+            return methodOutput;
         }
 
         return;
@@ -307,7 +305,7 @@ const crawlForSetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
     createAccessors
 );
 
-function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration, isInternal = false): string {
+function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -318,10 +316,6 @@ function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration, 
 
     if (!visibility) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
-    }
-
-    if (isInternal) {
-        return VisibilityMap[ts.SyntaxKind.PublicKeyword]
     }
 
     return VisibilityMap[visibility.kind];
