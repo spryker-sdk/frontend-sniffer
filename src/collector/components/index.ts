@@ -34,7 +34,7 @@ const restrictedScanForComponentsCollection = iif(
     from(scanForComponentsCollection)
 );
 
-const limitedScanForFilesCollection = (scanForComponents) => iif(
+const limitedScanForFilesCollection = scanForComponents => iif(
     () => environment.isOnly,
     scanForComponents.scanFunction().pipe(take(environment.only)),
     scanForComponents.scanFunction()

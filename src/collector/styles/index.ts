@@ -33,7 +33,7 @@ const restrictedScanForFilesCollection = iif(
     from(scanForFilesCollection)
 );
 
-const limitedScanForFilesCollection = (scanForFiles) => iif(
+const limitedScanForFilesCollection = scanForFiles => iif(
     () => environment.isOnly,
     scanForFiles.scanFunction().pipe(take(environment.only)),
     scanForFiles.scanFunction()
