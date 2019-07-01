@@ -29,11 +29,11 @@ export interface IMethod extends IFunction {
 
 export interface IClass {
     name: string
-    description: string
-    tags: ITag[]
+    description?: string
+    tags?: ITag[]
     properties: IProperty[]
     methods: IMethod[]
-    accessors: IAccessor[]
+    accessors?: IAccessor[]
 }
 
 export interface IProperty {
@@ -60,8 +60,7 @@ export interface ITypescriptExternalApi {
 }
 
 export interface ITypescriptInternalApi {
-    methods: IMethod[]
-    properties: IProperty[]
+    classes: IClass[]
 }
 
 export const VisibilityMap = {
@@ -219,14 +218,24 @@ function createMethod(isInternal = false) {
     }
 }
 
-function createClass(node: ts.ClassDeclaration): IClass {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        tags: extractTags(node),
-        properties: crawlForExternalProperty(node),
-        methods: crawlForExternalMethods(node),
-        accessors: mergeAccessors(node)
+function createClass(isInternal = false) {
+    return function(node: ts.ClassDeclaration): IClass {
+        const commonClassOutput = {
+            name: node.name ? node.name.getText() : '',
+            properties: crawlForProperty(isInternal)(node),
+            methods: crawlForMethods(isInternal)(node)
+        };
+
+        if (isInternal) {
+            return commonClassOutput;
+        }
+
+        return {
+            ...commonClassOutput,
+            description: extractDescription(node),
+            tags: extractTags(node),
+            accessors: mergeAccessors(node)
+        }
     }
 }
 
@@ -289,29 +298,19 @@ const crawlForFunctions = createCrawler<IFunction, ts.SourceFile>(
     createFunction
 );
 
-const crawlForExternalMethods = createCrawler<IMethod, ts.ClassDeclaration>(
+const crawlForMethods = (isInternal: boolean) => createCrawler<IMethod, ts.ClassDeclaration>(
     ts.SyntaxKind.MethodDeclaration,
-    createMethod()
+    createMethod(isInternal)
 );
 
-const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
+const crawlForClasses = (isInternal = false) => createCrawler<IClass, ts.SourceFile>(
     ts.SyntaxKind.ClassDeclaration,
-    createClass
+    createClass(isInternal)
 );
 
-const crawlForInternalMethods = createCrawler<IMethod, ts.SourceFile>(
-    ts.SyntaxKind.MethodDeclaration,
-    createMethod(true)
-);
-
-const crawlForExternalProperty = createCrawler<IProperty, ts.ClassDeclaration>(
+const crawlForProperty = (isInternal: boolean) => createCrawler<IProperty, ts.ClassDeclaration>(
     ts.SyntaxKind.PropertyDeclaration,
-    createProperty()
-);
-
-const crawlForInternalProperty = createCrawler<IProperty, ts.SourceFile>(
-    ts.SyntaxKind.PropertyDeclaration,
-    createProperty(true)
+    createProperty(isInternal)
 );
 
 const crawlForGetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
@@ -415,12 +414,11 @@ export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = as
             content: null,
             api: {
                 external: {
-                    classes: crawlForClasses(sourceFile),
+                    classes: crawlForClasses()(sourceFile),
                     functions: crawlForFunctions(sourceFile)
                 },
                 internal: {
-                    methods: crawlForInternalMethods(sourceFile),
-                    properties: crawlForInternalProperty(sourceFile)
+                    classes: crawlForClasses(true)(sourceFile)
                 }
             },
             log
