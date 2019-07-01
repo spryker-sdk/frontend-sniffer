@@ -97,6 +97,7 @@ const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
 const mergeAccessors = (node: ts.ClassDeclaration, isInternal: boolean): IAccessor[] =>
     merge(crawlForGetAccessors(isInternal)(node), crawlForSetAccessors(isInternal)(node));
+const isPublicVisibility = (node: TDeclarationVariants) => VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -201,9 +202,7 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
 
 function createMethod(isInternal = false) {
     return function (node: ts.MethodDeclaration): IMethod {
-        const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
-
-        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
             return {
                 ...createFunction(node),
                 visibility: extractVisibility(node)
@@ -237,9 +236,7 @@ function createClass(isInternal = false) {
 
 function createAccessors(isInternal = false) {
     return function(node: ts.AccessorDeclaration): IAccessor {
-        const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
-
-        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
             return {
                 name: node.name ? node.name.getText() : '',
                 description: extractDescription(node),
@@ -256,9 +253,7 @@ function createAccessors(isInternal = false) {
 
 function createProperty(isInternal = false) {
     return function (node: ts.PropertyDeclaration): IProperty {
-        const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
-
-        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
             return {
                 name: node.name ? node.name.getText() : '',
                 description: extractDescription(node),
