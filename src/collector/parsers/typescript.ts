@@ -33,7 +33,7 @@ export interface IClass {
     tags?: ITag[]
     properties: IProperty[]
     methods: IMethod[]
-    accessors?: IAccessor[]
+    accessors: IAccessor[]
 }
 
 export interface IProperty {
@@ -50,6 +50,7 @@ export interface IAccessor {
     returnType: string
     parameters: IParameter[]
     accessorType: string
+    visibility: string
 }
 
 export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration
@@ -94,8 +95,8 @@ const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
-const mergeAccessors = (node: ts.ClassDeclaration): IAccessor[] =>
-    merge(crawlForGetAccessors(node), crawlForSetAccessors(node));
+const mergeAccessors = (node: ts.ClassDeclaration, isInternal: boolean): IAccessor[] =>
+    merge(crawlForGetAccessors(isInternal)(node), crawlForSetAccessors(isInternal)(node));
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -218,7 +219,8 @@ function createClass(isInternal = false) {
         const commonClassOutput = {
             name: node.name ? node.name.getText() : '',
             properties: crawlForProperty(isInternal)(node),
-            methods: crawlForMethods(isInternal)(node)
+            methods: crawlForMethods(isInternal)(node),
+            accessors: mergeAccessors(node, isInternal)
         };
 
         if (isInternal) {
@@ -228,19 +230,27 @@ function createClass(isInternal = false) {
         return {
             ...commonClassOutput,
             description: extractDescription(node),
-            tags: extractTags(node),
-            accessors: mergeAccessors(node)
+            tags: extractTags(node)
         }
     }
 }
 
-function createAccessors(node: ts.AccessorDeclaration): IAccessor {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        parameters: extractParameters(node),
-        returnType: extractReturnValue(node),
-        accessorType: AccessorsMap[node.kind]
+function createAccessors(isInternal = false) {
+    return function(node: ts.AccessorDeclaration): IAccessor {
+        const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
+
+        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                parameters: extractParameters(node),
+                returnType: extractReturnValue(node),
+                accessorType: AccessorsMap[node.kind],
+                visibility: extractVisibility(node)
+            }
+        }
+
+        return;
     }
 }
 
@@ -303,17 +313,17 @@ const crawlForProperty = (isInternal: boolean) => createCrawler<IProperty, ts.Cl
     createProperty(isInternal)
 );
 
-const crawlForGetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+const crawlForGetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.GetAccessor,
-    createAccessors
+    createAccessors(isInternal)
 );
 
-const crawlForSetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+const crawlForSetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.SetAccessor,
-    createAccessors
+    createAccessors(isInternal)
 );
 
-function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
+function extractVisibility(node: TDeclarationVariants): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
