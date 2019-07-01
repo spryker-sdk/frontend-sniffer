@@ -201,17 +201,12 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
 function createMethod(isInternal = false) {
     return function (node: ts.MethodDeclaration): IMethod {
         const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
-        const methodOutput = {
-            ...createFunction(node),
-            visibility: extractVisibility(node)
-        };
 
-        if (!isInternal && isPublicMethod) {
-            return methodOutput;
-        }
-
-        if (isInternal && !isPublicMethod) {
-            return methodOutput;
+        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+            return {
+                ...createFunction(node),
+                visibility: extractVisibility(node)
+            };
         }
 
         return;
@@ -252,20 +247,15 @@ function createAccessors(node: ts.AccessorDeclaration): IAccessor {
 function createProperty(isInternal = false) {
     return function (node: ts.PropertyDeclaration): IProperty {
         const isPublicMethod = VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
-        const propertyOutput = {
-            name: node.name ? node.name.getText() : '',
-            description: extractDescription(node),
-            returnType: extractReturnValue(node),
-            visibility: extractVisibility(node),
-            isReadonly: isReadonly(node)
-        };
 
-        if (!isInternal && isPublicMethod) {
-            return propertyOutput;
-        }
-
-        if (isInternal && !isPublicMethod) {
-            return propertyOutput;
+        if ((!isInternal && isPublicMethod) || (isInternal && !isPublicMethod)) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                returnType: extractReturnValue(node),
+                visibility: extractVisibility(node),
+                isReadonly: isReadonly(node)
+            };
         }
 
         return;
