@@ -9,6 +9,7 @@ module.exports = class extends Rule {
     test(data) {
         data.components.forEach(component => {
             const { sass } = component.files;
+
             if (sass.exists) {
                 const zIndexRegularExpression = /z-index:[\sA-Za-z0-9-\+\$]+[;}]/gi;
                 const zIndexRules = sass.content.match(zIndexRegularExpression);
