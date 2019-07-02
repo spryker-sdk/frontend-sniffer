@@ -5,8 +5,8 @@ import { bold } from 'colors';
 
 type TCoreLevel = 'core';
 type TProjectLevel = 'project';
-export const coreLevel: string = 'core';
-export const projectLevel: string = 'project';
+export const coreLevel: TCoreLevel = 'core';
+export const projectLevel: TProjectLevel = 'project';
 
 interface IEnvironment {
     path: string
