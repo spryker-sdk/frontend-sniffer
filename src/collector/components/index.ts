@@ -1,30 +1,29 @@
-import {iif, Observable, from} from 'rxjs';
-import {map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter} from 'rxjs/operators';
-import {parseReadme, parseDeprecated, parseTwig, parseSass, parseTypescript, IParsedComponent} from './parser';
-import {getComponent, IComponent} from './component';
-import {printParsedComponentLog} from './log';
-import {config} from '../config';
-import {IScanSettings, scan} from '../../scanner';
-import {createDebugger, createLogger} from '../../logger';
-import {environment} from '../../environment';
-import {IStyleFile} from "../styles/parser";
+import { iif, Observable, from } from 'rxjs';
+import { map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter } from 'rxjs/operators';
+import { parseReadme, parseDeprecated, parseTwig, parseSass, parseTypescript, IParsedComponent } from './parser';
+import { getComponent, IComponent } from './component';
+import { printParsedComponentLog } from './log';
+import { config } from '../config';
+import { IScanSettings, scan } from '../../scanner';
+import { createDebugger, createLogger } from '../../logger';
+import { environment, coreLevel, projectLevel } from '../../environment';
 
 type TMergeMapResult = [string, IParsedComponent[]];
 export interface IParsedComponentResult { [key: string]: IParsedComponent[] }
 
 const debugComponent = createDebugger<IComponent>('Collecting component', 'namespace', 'module', 'type', 'name');
-const logCollection = (level: string) => createLogger<IStyleFile[]>(`${level} Components:`, 'length');
+const logCollection = (level: string) => createLogger<IParsedComponent[]>(`${level} Components:`, 'length');
 const scanForComponents = (configSettings: IScanSettings) => (): Observable<string> => scan(configSettings);
 const scanForComponentsCollection = [
     {
         scanFunction: scanForComponents(config.settings.core.scan.components),
-        scanMessage: logCollection('Vendor'),
-        scanLevel: 'vendor'
+        scanMessage: logCollection('Core'),
+        scanLevel: coreLevel
     },
     {
         scanFunction: scanForComponents(config.settings.project.scan.components),
         scanMessage: logCollection('Project'),
-        scanLevel: 'project'
+        scanLevel: projectLevel
     }
 ];
 

@@ -3,13 +3,18 @@ import { isAbsolute, resolve } from 'path';
 import { log, error, debug } from './logger';
 import { bold } from 'colors';
 
+type TCoreLevel = 'core';
+type TProjectLevel = 'project';
+export const coreLevel: string = 'core';
+export const projectLevel: string = 'project';
+
 interface IEnvironment {
     path: string
     configPath: string
     excludeSniffer: boolean
     only: number
     debugMode: boolean
-    levelRestriction: 'project' | 'vendor'
+    levelRestriction: TProjectLevel | TCoreLevel
 }
 
 export class Environment {
@@ -84,13 +89,13 @@ export class Environment {
     }
 
     get isAllowedLevel(): boolean {
-        const allowedLevelsPaths = ['project', 'vendor'];
+        const allowedLevelsPaths = [projectLevel, coreLevel];
         const requestedLevel = this.variables.levelRestriction;
 
         return allowedLevelsPaths.some(level => requestedLevel === level);
     }
 
-    get levelRestriction(): 'project' | 'vendor' {
+    get levelRestriction(): TProjectLevel | TCoreLevel {
         return this.variables.levelRestriction;
     }
 }

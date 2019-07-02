@@ -19,11 +19,11 @@ export interface ICollectorOutput {
     applicationFiles: IApplicationFile[]
     styleFiles: {
         project?: IStyleFile[]
-        vendor?: IStyleFile[]
+        core?: IStyleFile[]
     }
     components: {
         project?: IParsedComponent[]
-        vendor?: IParsedComponent[]
+        core?: IParsedComponent[]
     }
 }
 
