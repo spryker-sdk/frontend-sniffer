@@ -1,5 +1,6 @@
 const { dim, bold } = require('colors');
 const { Rule } = require('../api');
+const { htmlTags } = require('../config/html-tags');
 
 module.exports = class extends Rule {
     getName() {
@@ -15,17 +16,43 @@ module.exports = class extends Rule {
 
                 definitions.forEach(definition => {
                     if (definition.name !== 'config') {
-                        return
+                        return;
                     }
 
                     const { contract } = definition;
                     const tagWordIndex = contract.indexOf('tag:');
+
+                    if (tagWordIndex < 0) {
+                        return;
+                    }
+
+                    const { type, name, path } = component;
                     const croppedStringFromTagWord = contract.slice(tagWordIndex);
                     const tagPropertyString = croppedStringFromTagWord.slice(0, croppedStringFromTagWord.indexOf('\n'));
-                    const tagName = tagPropertyString.slice(tagPropertyString.indexOf('\'') + 1, tagPropertyString.lastIndexOf('\''));
+                    const startPositionTagNameInString = tagPropertyString.indexOf('\'') + 1;
+                    const endPositionTagNameInString = tagPropertyString.lastIndexOf('\'');
+                    const tagName = tagPropertyString.slice(startPositionTagNameInString, endPositionTagNameInString);
+                    const mandatorySymbolsRegularExpression = /^[a-z0-9\-]+$/;
+                    const filteredHtmlTagArray = htmlTags.filter(tagData => (tagData.tagName === tagName && !tagData.single));
 
                     if (tagName === 'div') {
-                        this.outcome.addError(`it shouldn't be tag property with div value in config of ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
+                        this.outcome.addError(`It shouldn't be tag property with div value in config of ${type} ${bold(name)}:\n${dim(path)}`);
+
+                        return;
+                    }
+
+                    if (!mandatorySymbolsRegularExpression.test(tagName)) {
+                        this.outcome.addError(`The tag name must include only latin lowercase letters, arabic numerals and hyphens in ${type} ${bold(name)}:\n${dim(path)}`);
+
+                        return;
+                    }
+
+                    if (tagName.includes('-')) {
+                        return;
+                    }
+
+                    if (!filteredHtmlTagArray.length || filteredHtmlTagArray[0].single) {
+                        this.outcome.addError(`The tag name property should be valid pair html tag in ${type} ${bold(name)}:\n${dim(path)}`);
                     }
                 })
             }
