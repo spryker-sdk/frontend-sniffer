@@ -16,7 +16,5 @@ module.exports = {
         }
     },
 
-    enable: [
-        'mandatory-readme'
-    ]
+    enable: []
 }
