@@ -29,8 +29,8 @@ export interface IMethod extends IFunction {
 
 export interface IClass {
     name: string
-    description: string
-    tags: ITag[]
+    description?: string
+    tags?: ITag[]
     properties: IProperty[]
     methods: IMethod[]
     accessors: IAccessor[]
@@ -50,13 +50,18 @@ export interface IAccessor {
     returnType: string
     parameters: IParameter[]
     accessorType: string
+    visibility: string
 }
 
 export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration
 
-export interface ITypescriptApi {
+export interface ITypescriptExternalApi {
     classes: IClass[]
     functions: IFunction[]
+}
+
+export interface ITypescriptInternalApi {
+    classes: IClass[]
 }
 
 export const VisibilityMap = {
@@ -90,8 +95,9 @@ const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
-const mergeAccessors = (node: ts.ClassDeclaration): IAccessor[] =>
-    merge(crawlForGetAccessors(node), crawlForSetAccessors(node));
+const mergeAccessors = (node: ts.ClassDeclaration, isInternal: boolean): IAccessor[] =>
+    merge(crawlForGetAccessors(isInternal)(node), crawlForSetAccessors(isInternal)(node));
+const hasPublicVisibility = (node: TDeclarationVariants) => VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -193,41 +199,76 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
     }
 }
 
-function createMethod(node: ts.MethodDeclaration): IMethod {
-    return {
-        ...createFunction(node),
-        visibility: extractVisibility(node)
+function createMethod(isInternal = false) {
+    return function (node: ts.MethodDeclaration): IMethod {
+        const isMethodInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isMethodInScope) {
+            return {
+                ...createFunction(node),
+                visibility: extractVisibility(node)
+            };
+        }
+
+        return;
     }
 }
 
-function createClass(node: ts.ClassDeclaration): IClass {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        tags: extractTags(node),
-        properties: crawlForProperty(node),
-        methods: crawlForMethods(node),
-        accessors: mergeAccessors(node)
+function createClass(isInternal = false) {
+    return function(node: ts.ClassDeclaration): IClass {
+        const commonClassOutput = {
+            name: node.name ? node.name.getText() : '',
+            properties: crawlForProperty(isInternal)(node),
+            methods: crawlForMethods(isInternal)(node),
+            accessors: mergeAccessors(node, isInternal)
+        };
+
+        if (isInternal) {
+            return commonClassOutput;
+        }
+
+        return {
+            ...commonClassOutput,
+            description: extractDescription(node),
+            tags: extractTags(node)
+        }
     }
 }
 
-function createAccessors(node: ts.AccessorDeclaration): IAccessor {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        parameters: extractParameters(node),
-        returnType: extractReturnValue(node),
-        accessorType: AccessorsMap[node.kind]
+function createAccessors(isInternal = false) {
+    return function(node: ts.AccessorDeclaration): IAccessor {
+        const isAccessorInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isAccessorInScope) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                parameters: extractParameters(node),
+                returnType: extractReturnValue(node),
+                accessorType: AccessorsMap[node.kind],
+                visibility: extractVisibility(node)
+            }
+        }
+
+        return;
     }
 }
 
-function createProperty(node: ts.PropertyDeclaration): IProperty {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        returnType: extractReturnValue(node),
-        visibility: extractVisibility(node),
-        isReadonly: isReadonly(node)
+function createProperty(isInternal = false) {
+    return function (node: ts.PropertyDeclaration): IProperty {
+        const isPropertyInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isPropertyInScope) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                returnType: extractReturnValue(node),
+                visibility: extractVisibility(node),
+                isReadonly: isReadonly(node)
+            };
+        }
+
+        return;
     }
 }
 
@@ -247,7 +288,8 @@ function createCrawler<O, I extends ts.Node = ts.Node>(
 
         return children
             .map(crawler)
-            .reduce(merge, results);
+            .reduce(merge, results)
+            .filter(item => Boolean(item));
     }
 }
 
@@ -256,32 +298,32 @@ const crawlForFunctions = createCrawler<IFunction, ts.SourceFile>(
     createFunction
 );
 
-const crawlForMethods = createCrawler<IMethod, ts.ClassDeclaration>(
+const crawlForMethods = (isInternal: boolean) => createCrawler<IMethod, ts.ClassDeclaration>(
     ts.SyntaxKind.MethodDeclaration,
-    createMethod
+    createMethod(isInternal)
 );
 
-const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
+const crawlForClasses = (isInternal = false) => createCrawler<IClass, ts.SourceFile>(
     ts.SyntaxKind.ClassDeclaration,
-    createClass
+    createClass(isInternal)
 );
 
-const crawlForProperty = createCrawler<IProperty, ts.ClassDeclaration>(
+const crawlForProperty = (isInternal: boolean) => createCrawler<IProperty, ts.ClassDeclaration>(
     ts.SyntaxKind.PropertyDeclaration,
-    createProperty
+    createProperty(isInternal)
 );
 
-const crawlForGetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+const crawlForGetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.GetAccessor,
-    createAccessors
+    createAccessors(isInternal)
 );
 
-const crawlForSetAccessors = createCrawler<IAccessor, ts.ClassDeclaration>(
+const crawlForSetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
     ts.SyntaxKind.SetAccessor,
-    createAccessors
+    createAccessors(isInternal)
 );
 
-function extractVisibility(node: ts.MethodDeclaration | ts.PropertyDeclaration): string {
+function extractVisibility(node: TDeclarationVariants): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -341,7 +383,7 @@ function extractDescription(node: ts.Node): string {
     return commentNode.comment || null;
 }
 
-export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IParserOutput<ITypescriptApi>> => {
+export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = async (file: string): Promise<IParserOutput<ITypescriptExternalApi, ITypescriptInternalApi>> => {
     if (!file) {
         return null;
     }
@@ -372,10 +414,12 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
             content: null,
             api: {
                 external: {
-                    classes: crawlForClasses(sourceFile),
+                    classes: crawlForClasses()(sourceFile),
                     functions: crawlForFunctions(sourceFile)
                 },
-                internal: null
+                internal: {
+                    classes: crawlForClasses(true)(sourceFile)
+                }
             },
             log
         }
