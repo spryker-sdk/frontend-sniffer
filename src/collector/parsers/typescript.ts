@@ -97,7 +97,7 @@ const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
 const mergeAccessors = (node: ts.ClassDeclaration, isInternal: boolean): IAccessor[] =>
     merge(crawlForGetAccessors(isInternal)(node), crawlForSetAccessors(isInternal)(node));
-const isPublicVisibility = (node: TDeclarationVariants) => VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
+const hasPublicVisibility = (node: TDeclarationVariants) => VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -202,7 +202,9 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
 
 function createMethod(isInternal = false) {
     return function (node: ts.MethodDeclaration): IMethod {
-        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
+        const isMethodInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isMethodInScope) {
             return {
                 ...createFunction(node),
                 visibility: extractVisibility(node)
@@ -236,7 +238,9 @@ function createClass(isInternal = false) {
 
 function createAccessors(isInternal = false) {
     return function(node: ts.AccessorDeclaration): IAccessor {
-        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
+        const isAccessorInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isAccessorInScope) {
             return {
                 name: node.name ? node.name.getText() : '',
                 description: extractDescription(node),
@@ -253,7 +257,9 @@ function createAccessors(isInternal = false) {
 
 function createProperty(isInternal = false) {
     return function (node: ts.PropertyDeclaration): IProperty {
-        if ((!isInternal && isPublicVisibility(node)) || (isInternal && !isPublicVisibility(node))) {
+        const isPropertyInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isPropertyInScope) {
             return {
                 name: node.name ? node.name.getText() : '',
                 description: extractDescription(node),
