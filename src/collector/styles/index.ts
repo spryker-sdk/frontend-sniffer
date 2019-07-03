@@ -6,9 +6,9 @@ import { getFile, IFile } from '../file';
 import { parseSass, IStyleFile } from './parser';
 import { printParsedFileLog } from '../log';
 import { createDebugger, createLogger } from '../../logger';
-import { environment, coreLevel, projectLevel } from '../../environment';
+import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
 
-type TMergeMapResult = [string, IStyleFile[]];
+type TMergeMapResult = [TLevelRestriction, IStyleFile[]];
 export interface IStyleFilesResult { [key: string]: IStyleFile[] }
 
 const debugFile = createDebugger<IFile>('Collecting style', 'name');

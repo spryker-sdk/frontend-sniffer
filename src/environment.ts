@@ -5,6 +5,7 @@ import { bold } from 'colors';
 
 type TCoreLevel = 'core';
 type TProjectLevel = 'project';
+export type TLevelRestriction = TCoreLevel | TProjectLevel;
 export const coreLevel: TCoreLevel = 'core';
 export const projectLevel: TProjectLevel = 'project';
 
@@ -14,7 +15,7 @@ interface IEnvironment {
     excludeSniffer: boolean
     only: number
     debugMode: boolean
-    levelRestriction: TProjectLevel | TCoreLevel
+    levelRestriction: TLevelRestriction
 }
 
 export class Environment {
@@ -95,7 +96,7 @@ export class Environment {
         return allowedLevelsPaths.some(level => requestedLevel === level);
     }
 
-    get levelRestriction(): TProjectLevel | TCoreLevel {
+    get levelRestriction(): TLevelRestriction {
         return this.variables.levelRestriction;
     }
 }

@@ -6,9 +6,9 @@ import { printParsedComponentLog } from './log';
 import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
-import { environment, coreLevel, projectLevel } from '../../environment';
+import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
 
-type TMergeMapResult = [string, IParsedComponent[]];
+type TMergeMapResult = [TLevelRestriction, IParsedComponent[]];
 export interface IParsedComponentResult { [key: string]: IParsedComponent[] }
 
 const debugComponent = createDebugger<IComponent>('Collecting component', 'namespace', 'module', 'type', 'name');
