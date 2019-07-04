@@ -26,9 +26,8 @@ module.exports = class extends Rule {
 
                 classes.forEach(singleClass => {
                     const { name: className } = singleClass;
-                    const letterArray = className.split('');
-                    const convertedLetterArray = letterArray.map(letter => (/^[A-Z]/.test(letter)) ? `-${letter.toLowerCase()}` : letter);
-                    const convertedClassName = convertedLetterArray.join('').slice(1);
+                    const camelCaseToDash = string => string.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase();
+                    const convertedClassName = camelCaseToDash(className);
 
                     if (name !== convertedClassName) {
                         this.outcome.addError(`There is wrong class name in typescript file in ${type} ${bold(name)}:\n${dim(path)}`);
