@@ -7,6 +7,7 @@ export interface ICollectorConfig {
             application: IScanSettings
             styles: IScanSettings
             components: IScanSettings
+            views: IScanSettings
         }
     }
 
@@ -15,6 +16,7 @@ export interface ICollectorConfig {
             application: IScanSettings
             styles: IScanSettings
             components: IScanSettings
+            views: IScanSettings
         }
     }
 }

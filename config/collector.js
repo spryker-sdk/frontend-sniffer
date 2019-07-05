@@ -56,6 +56,20 @@ const createScanConfig = (dirs) => ({
             onlyFiles: false,
             onlyDirectories: true
         }
+    },
+
+    views: {
+        dirs,
+        patterns: [
+            '**/Theme/default/templates/*',
+            ...excludedPatterns
+        ],
+        options: {
+            followSymlinkedDirectories: false,
+            absolute: true,
+            onlyFiles: false,
+            onlyDirectories: true
+        }
     }
 })
 
