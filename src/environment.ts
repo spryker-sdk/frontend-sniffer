@@ -3,12 +3,19 @@ import { isAbsolute, resolve } from 'path';
 import { log, error, debug } from './logger';
 import { bold } from 'colors';
 
+type TCoreLevel = 'core';
+type TProjectLevel = 'project';
+export type TLevelRestriction = TCoreLevel | TProjectLevel;
+export const coreLevel: TCoreLevel = 'core';
+export const projectLevel: TProjectLevel = 'project';
+
 interface IEnvironment {
     path: string
-    configPath: string,
+    configPath: string
     excludeSniffer: boolean
     only: number
     debugMode: boolean
+    levelRestriction: TLevelRestriction
 }
 
 export class Environment {
@@ -17,7 +24,8 @@ export class Environment {
         configPath: process.cwd(),
         excludeSniffer: false,
         only: null,
-        debugMode: false
+        debugMode: false,
+        levelRestriction: null
     }
 
     protected check(): boolean {
@@ -79,6 +87,17 @@ export class Environment {
 
     get debugMode(): boolean {
         return this.variables.debugMode;
+    }
+
+    get isAllowedLevel(): boolean {
+        const allowedLevelsPaths = [projectLevel, coreLevel];
+        const requestedLevel = this.variables.levelRestriction;
+
+        return allowedLevelsPaths.some(level => requestedLevel === level);
+    }
+
+    get levelRestriction(): TLevelRestriction {
+        return this.variables.levelRestriction;
     }
 }
 

@@ -1,11 +1,11 @@
 import { IFile } from '../file';
 import { IParsedFile, IParserOutput } from '../parsers/base';
-import { parse, ITypescriptApi } from '../parsers/typescript';
+import { parse, ITypescriptExternalApi, ITypescriptInternalApi } from '../parsers/typescript';
 
-export interface IApplicationFile extends IParsedFile<ITypescriptApi> { }
+export interface IApplicationFile extends IParsedFile<ITypescriptExternalApi, ITypescriptInternalApi> { }
 
 export async function parseTypescript(file: IFile): Promise<IApplicationFile> {
-    const output: IParserOutput<ITypescriptApi> = await parse(file.path);
+    const output: IParserOutput<ITypescriptExternalApi, ITypescriptInternalApi> = await parse(file.path);
 
     return {
         ...file,
