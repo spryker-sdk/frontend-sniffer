@@ -7,18 +7,18 @@ export interface IPartiallyParsedView<W extends IFile = IParsedFile<ITwigApi> | 
 export interface IParsedView extends IPartiallyParsedView<IParsedFile<ITwigApi>> {}
 
 const createApiParser = <T>(fileToParse: string, parser: TParser<T>) => async (view: IPartiallyParsedView): Promise<IPartiallyParsedView | IParsedView> => {
-    if (!view.files[fileToParse].exists) {
+    if (!view.file[fileToParse].exists) {
         return view;
     }
 
-    const output: IParserOutput<T> = await parser(view.files[fileToParse].path);
+    const output: IParserOutput<T> = await parser(view.file[fileToParse].path);
 
     return {
         ...view,
-        files: {
-            ...view.files,
+        file: {
+            ...view.file,
             [fileToParse]: <IParsedFile<T>>{
-                ...view.files[fileToParse],
+                ...view.file[fileToParse],
                 ...output
             }
         }

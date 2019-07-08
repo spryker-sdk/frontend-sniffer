@@ -9,6 +9,10 @@ export interface IFile {
     relativePath: string
 }
 
+export interface IType {
+    type: string
+}
+
 export function getFile(path: string): IFile {
     if (!existsSync(path)) {
         return {
@@ -24,5 +28,17 @@ export function getFile(path: string): IFile {
         name: basename(path),
         path,
         relativePath: path.replace(environment.path, '')
+    }
+}
+
+export function getType(path: string): IType {
+    if (!existsSync(path)) {
+        return {
+            type: '',
+        }
+    }
+
+    return {
+        type: path.includes('/Theme/default/views/') ? 'view' : 'template'
     }
 }

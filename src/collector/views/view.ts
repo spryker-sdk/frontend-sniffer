@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { join, basename } from 'path';
-import { IFile, getFile } from '../file';
+import { IFile, IType, getFile, getType } from '../file';
 
 export interface IView<W extends IFile = IFile> {
     id: string
@@ -8,13 +8,15 @@ export interface IView<W extends IFile = IFile> {
     path: string
     name: string
     module: string
-    files: {
+    file: {
         twig: W
+        type: string
     }
 }
 
 export function getView(path: string): IView {
     const name = basename(path);
+    const pathToFile = join(path, `${name}.twig`);
 
     return {
         id: createHash('md5').update(path).digest('hex'),
@@ -22,8 +24,9 @@ export function getView(path: string): IView {
         path,
         name,
         module: basename(join(path, '../../../..')),
-        files: {
-            twig: getFile(join(path, `${name}.twig`))
+        file: {
+            twig: getFile(pathToFile),
+            ...getType(pathToFile),
         }
     }
 }

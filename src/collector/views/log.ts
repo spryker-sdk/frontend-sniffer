@@ -4,7 +4,7 @@ import { IParsedView } from './parser';
 
 export function printParsedViewLog(view: IParsedView): IParsedView {
     Object
-        .values(view.files)
+        .values(view.file)
         .forEach((file: IParsedFile) => printParsedFileLog(file));
     return view;
 }
