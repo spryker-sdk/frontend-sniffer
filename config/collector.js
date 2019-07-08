@@ -61,8 +61,8 @@ const createScanConfig = (dirs, cwdPattern) => ({
     twigs: {
         dirs,
         patterns: [
-            '**/Theme/default/views/*',
-            '**/Theme/default/templates/*',
+            `${cwdPattern}Theme/default/views/*`,
+            `${cwdPattern}Theme/default/templates/*`,
             ...excludedPatterns
         ],
         options: {

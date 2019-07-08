@@ -2,9 +2,10 @@ import { printParsedFileLog } from '../log';
 import { IParsedFile } from '../parsers/base';
 import { IParsedTwig } from './parser';
 
-export function printParsedViewLog(view: IParsedTwig): IParsedTwig {
+export function printParsedViewLog(twig: IParsedTwig): IParsedTwig {
     Object
-        .values(view.file)
+        .values(twig.file)
         .forEach((file: IParsedFile) => printParsedFileLog(file));
-    return view;
+
+    return twig;
 }
