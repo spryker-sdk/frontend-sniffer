@@ -7,7 +7,7 @@ export interface ICollectorConfig {
             application: IScanSettings
             styles: IScanSettings
             components: IScanSettings
-            views: IScanSettings
+            twigs: IScanSettings
         }
     }
 
@@ -16,7 +16,7 @@ export interface ICollectorConfig {
             application: IScanSettings
             styles: IScanSettings
             components: IScanSettings
-            views: IScanSettings
+            twigs: IScanSettings
         }
     }
 }

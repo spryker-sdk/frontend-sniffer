@@ -1,8 +1,8 @@
 import { createHash } from 'crypto';
 import { join, basename } from 'path';
-import { IFile, IType, getFile, getType } from '../file';
+import { IFile, getFile, getType } from '../file';
 
-export interface IView<W extends IFile = IFile> {
+export interface ITwig<W extends IFile = IFile> {
     id: string
     namespace: string
     path: string
@@ -14,7 +14,7 @@ export interface IView<W extends IFile = IFile> {
     }
 }
 
-export function getView(path: string): IView {
+export function getTwig(path: string): ITwig {
     const name = basename(path);
     const pathToFile = join(path, `${name}.twig`);
 

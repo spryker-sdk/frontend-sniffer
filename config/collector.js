@@ -58,7 +58,7 @@ const createScanConfig = (dirs, cwdPattern) => ({
         }
     },
 
-    views: {
+    twigs: {
         dirs,
         patterns: [
             '**/Theme/default/views/*',

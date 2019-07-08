@@ -2,11 +2,11 @@ import { forkJoin } from 'rxjs';
 import { getObservable as getApplicationObservable } from './application';
 import { getObservable as getStylesObservable, IStyleFilesResult } from './styles';
 import { getObservable as getComponentsObservable, IParsedComponentResult } from './components';
-import { getObservable as getViewsObservable, IParsedViewResult } from './views';
+import { getObservable as getTwigsObservable, IParsedTwigResult } from './twigs';
 import { IApplicationFile } from './application/parser';
 import { IStyleFile } from './styles/parser';
 import { IParsedComponent } from './components/parser';
-import { IParsedView } from './views/parser';
+import { IParsedTwig } from './twigs/parser';
 import { info } from '../logger';
 
 export type TCollectorObjectFields = IStyleFilesResult | IParsedComponentResult;
@@ -15,7 +15,7 @@ export type TCollectorObservableOutput = {
     applicationFiles: IApplicationFile[]
     styleFiles: IStyleFilesResult
     components: IParsedComponentResult
-    views: IParsedViewResult;
+    twigs: IParsedTwigResult;
 };
 
 export interface ICollectorOutput {
@@ -28,9 +28,9 @@ export interface ICollectorOutput {
         project?: IParsedComponent[]
         core?: IParsedComponent[]
     }
-    views: {
-        project?: IParsedView[]
-        core?: IParsedView[]
+    twigs: {
+        project?: IParsedTwig[]
+        core?: IParsedTwig[]
     }
 }
 
@@ -41,11 +41,11 @@ export const collect = (): Promise<ICollectorOutput> => new Promise<any>((resolv
         applicationFiles: getApplicationObservable(),
         styleFiles: getStylesObservable(),
         components: getComponentsObservable(),
-        views: getViewsObservable(),
+        twigs: getTwigsObservable(),
     }).subscribe((observableOutput: TCollectorObservableOutput) => resolve({
         applicationFiles: observableOutput.applicationFiles,
         styleFiles: observableOutput.styleFiles,
         components: observableOutput.components,
-        views: observableOutput.views,
+        twigs: observableOutput.twigs,
     }));
 });
