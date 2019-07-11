@@ -12,7 +12,7 @@ type TMergeMapResult = [TLevelRestriction, IParsedTwig[]];
 export interface IParsedTwigResult { [key: string]: IParsedTwig[] }
 
 const debugTwig = createDebugger<ITwig>('Collecting twigs', 'namespace', 'module', 'type', 'name');
-const logCollection = (level: string) => createLogger<IParsedTwig[]>(`${level} Components:`, 'length');
+const logCollection = (level: string) => createLogger<IParsedTwig[]>(`${level} twigs:`, 'length');
 const scanForTwigs = (configSettings: IScanSettings) => (): Observable<string> => scan(configSettings);
 const scanForTwigsCollection = [
     {

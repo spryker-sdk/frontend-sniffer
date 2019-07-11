@@ -8,6 +8,7 @@ import { IStyleFile } from './styles/parser';
 import { IParsedComponent } from './components/parser';
 import { IParsedTwig } from './twigs/parser';
 import { info } from '../logger';
+import { getModuleWrapper } from './wrappers/module';
 
 export type TCollectorObjectFields = IStyleFilesResult | IParsedComponentResult;
 
@@ -15,7 +16,7 @@ export type TCollectorObservableOutput = {
     applicationFiles: IApplicationFile[]
     styleFiles: IStyleFilesResult
     components: IParsedComponentResult
-    twigs: IParsedTwigResult;
+    twigs: IParsedTwigResult
 };
 
 export interface ICollectorOutput {
@@ -42,10 +43,13 @@ export const collect = (): Promise<ICollectorOutput> => new Promise<any>((resolv
         styleFiles: getStylesObservable(),
         components: getComponentsObservable(),
         twigs: getTwigsObservable(),
-    }).subscribe((observableOutput: TCollectorObservableOutput) => resolve({
-        applicationFiles: observableOutput.applicationFiles,
-        styleFiles: observableOutput.styleFiles,
-        components: observableOutput.components,
-        twigs: observableOutput.twigs,
-    }));
+    }).subscribe((observableOutput: TCollectorObservableOutput) => {
+        const modules = getModuleWrapper(observableOutput.components, observableOutput.twigs);
+
+        return resolve({
+            applicationFiles: observableOutput.applicationFiles,
+            styleFiles: observableOutput.styleFiles,
+            modules: modules,
+        });
+    })
 });

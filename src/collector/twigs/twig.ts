@@ -8,9 +8,9 @@ export interface ITwig<W extends IFile = IFile> {
     path: string
     name: string
     module: string
+    type: string
     file: {
         twig: W
-        type: string
     }
 }
 
@@ -24,9 +24,9 @@ export function getTwig(path: string): ITwig {
         path,
         name,
         module: basename(join(path, '../../../..')),
+        ...getType(pathToFile),
         file: {
             twig: getFile(pathToFile),
-            ...getType(pathToFile),
         }
     }
 }
