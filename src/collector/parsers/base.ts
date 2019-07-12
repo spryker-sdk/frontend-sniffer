@@ -15,6 +15,6 @@ export interface IParserOutput<E = any, I = any> {
     log?: IParserLog
 }
 
-export type TParser<T> = (file: string) => Promise<IParserOutput<T>>
+export type TParser<T, I = any> = (file: string) => Promise<IParserOutput<T, I>>
 
-export interface IParsedFile<T = any> extends IFile, IParserOutput<T> { }
+export interface IParsedFile<T = any, I = any> extends IFile, IParserOutput<T, I> { }
