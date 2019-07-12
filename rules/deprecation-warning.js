@@ -1,4 +1,4 @@
-const { Rule } = require('../api');
+const { Rule, parseOutputFieldHelper } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
+        parseOutputFieldHelper(data.components).forEach(component => {
             if (component.isDeprecated) {
                 this.outcome.addWarning(`${component.name} is deprecated`);
             }
