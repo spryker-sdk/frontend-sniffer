@@ -14,7 +14,7 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const { typescript } = component.files;
+            const { typescript } = files;
             const { external } = typescript.api;
             const { classes } = external;
             const { name: typescriptFileName } = typescript;
