@@ -58,10 +58,9 @@ const createScanConfig = (dirs, cwdPattern) => ({
         }
     },
 
-    twigs: {
+    templates: {
         dirs,
         patterns: [
-            `${cwdPattern}Theme/default/views/*`,
             `${cwdPattern}Theme/default/templates/*`,
             ...excludedPatterns
         ],
@@ -71,13 +70,27 @@ const createScanConfig = (dirs, cwdPattern) => ({
             onlyFiles: false,
             onlyDirectories: true
         }
+    },
+
+    views: {
+        dirs,
+        patterns: [
+            `${cwdPattern}Theme/default/views/*`,
+            ...excludedPatterns
+        ],
+        options: {
+            followSymlinkedDirectories: false,
+            absolute: true,
+            onlyFiles: false,
+            onlyDirectories: true
+        }
     }
-})
+});
 
 exports.core = {
     scan: createScanConfig(['./'], '**/vendor/**/spryker-shop/**/')
-}
+};
 
 exports.project = {
     scan: createScanConfig(['./'], '**/src/Pyz/Yves/**/')
-}
+};

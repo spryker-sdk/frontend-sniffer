@@ -28,7 +28,7 @@ export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S 
     }
 }
 
-function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: string[]) {
+export function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: string[]) {
     const twigFileNameInComponent = directoryFiles.filter(fileName => fileName.includes('.twig'))[0];
     if (!directoryFiles.includes(defaultFileName) && twigFileNameInComponent) {
         return twigFileNameInComponent;
