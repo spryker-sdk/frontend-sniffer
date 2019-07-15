@@ -20,7 +20,6 @@ export function getView(path: string): IView {
     const type = basename(dirname(path)).slice(0, -1);
     const name = basename(path);
     const directoryFiles = readdirSync(path);
-    const pathToFile = join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles));
 
     return {
         id: createHash('md5').update(path).digest('hex'),
@@ -29,7 +28,7 @@ export function getView(path: string): IView {
         module,
         name,
         files: {
-            twig: getFile(pathToFile)
+            twig: getFile(join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles)))
         }
     }
 }

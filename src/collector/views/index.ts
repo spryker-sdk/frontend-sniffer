@@ -1,7 +1,7 @@
 import { iif, Observable, from } from 'rxjs';
 import { map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter } from 'rxjs/operators';
 import { getView, IView } from './view';
-import { parseViews, IParsedViews } from './parser';
+import { parseTwig, IParsedViews } from './parser';
 import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
@@ -44,7 +44,7 @@ export const getObservable = (): Observable<IParsedViewsResult> => restrictedSca
         limitedScanForFilesCollection(scanForViews).pipe(
             map(getView),
             tap(debugViews),
-            flatMap(parseViews),
+            flatMap(parseTwig),
             tap(printParsedTemplateLog),
             toArray<IParsedViews>(),
             tap(scanForViews.scanMessage)

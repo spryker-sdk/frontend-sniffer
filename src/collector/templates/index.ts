@@ -1,7 +1,7 @@
 import { iif, Observable, from } from 'rxjs';
 import { map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter } from 'rxjs/operators';
 import { getTemplate, ITemplate } from './template';
-import { parseTemplates, IParsedTemplates } from './parser';
+import { parseSass, parseTwig, IParsedTemplates } from './parser';
 import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
@@ -44,7 +44,8 @@ export const getObservable = (): Observable<IParsedTemplatesResult> => restricte
         limitedScanForFilesCollection(scanForTemplates).pipe(
             map(getTemplate),
             tap(debugTemplates),
-            flatMap(parseTemplates),
+            flatMap(parseTwig),
+            flatMap(parseSass),
             tap(printParsedTemplateLog),
             toArray<IParsedTemplates>(),
             tap(scanForTemplates.scanMessage)

@@ -37,7 +37,7 @@ export function extractCorrectTwigFileName(defaultFileName: string, directoryFil
     return defaultFileName;
 }
 
-function extractCorrectScssFileName(defaultFileName: string, directoryFiles: string[]) {
+export function extractCorrectScssFileName(defaultFileName: string, directoryFiles: string[]) {
     const scssFileNameInComponent = directoryFiles.filter(fileName =>
         fileName.includes('.scss') && fileName !== 'style.scss'
     )[0];
