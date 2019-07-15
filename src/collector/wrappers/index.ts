@@ -30,21 +30,21 @@ export function getModuleWrapper(components, templates, views): IParsedModules {
         const modulesByName = (modulesByLevel, level) =>  modulesByLevel.forEach((moduleByLevel) => {
             const moduleName = moduleByLevel['module'];
             const moduleType = moduleByLevel['type'];
-            const isModulesByNameExist = modules[level] && modules[level][moduleName];
-            const isModulesByTypeExist = isModulesByNameExist && modules[level][moduleName][moduleType];
+            const isModulesByNameExist = modules[level] && modules[level][`${moduleName}s`];
+            const isModulesByTypeExist = isModulesByNameExist && modules[level][`${moduleName}s`][`${moduleType}s`];
             const moduleByLevelData = modules[level] ? modules[level] : [];
-            const moduleByNameData = isModulesByNameExist ? modules[level][moduleName] : [];
-            const moduleByTypeData = isModulesByTypeExist ? modules[level][moduleName][moduleType]: [];
+            const moduleByNameData = isModulesByNameExist ? modules[level][`${moduleName}s`] : [];
+            const moduleByTypeData = isModulesByTypeExist ? modules[level][`${moduleName}s`][`${moduleType}s`]: [];
 
             modules = {
                 ...modules,
                 [level]: {
                    ...moduleByLevelData,
-                   [moduleName]: {
+                   [`${moduleName}s`]: {
                        ...moduleByNameData,
-                       [moduleType]: [
+                       [`${moduleType}s`]: [
                            ...moduleByTypeData,
-                           {...moduleByLevel}
+                           { ...moduleByLevel }
                        ]
                    }
                 }

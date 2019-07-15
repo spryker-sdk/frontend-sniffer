@@ -1,17 +1,17 @@
 import { iif, Observable, from } from 'rxjs';
 import { map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter } from 'rxjs/operators';
-import { getFile, IFile } from '../file';
+import { getTemplate, ITemplate } from './template';
 import { parseTemplates, IParsedTemplates } from './parser';
 import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
 import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
-import {printParsedFileLog} from "../log";
+import { printParsedTemplateLog } from './log';
 
 type TMergeMapResult = [TLevelRestriction, IParsedTemplates[]];
 export interface IParsedTemplatesResult { [key: string]: IParsedTemplates[] }
 
-const debugTemplates = createDebugger<IFile>('Collecting twigs', 'namespace', 'module', 'type', 'name');
+const debugTemplates = createDebugger<ITemplate>('Collecting template', 'namespace', 'module', 'type', 'name');
 const logCollection = (level: string) => createLogger<IParsedTemplates[]>(`${level} Templates:`, 'length');
 const scanForTemplates = (configSettings: IScanSettings) => (): Observable<string> => scan(configSettings);
 const scanForTemplatesCollection = [
@@ -42,10 +42,10 @@ const limitedScanForFilesCollection = scanForTemplates => iif(
 export const getObservable = (): Observable<IParsedTemplatesResult> => restrictedScanForTwigsCollection.pipe(
     mergeMap(scanForTemplates =>
         limitedScanForFilesCollection(scanForTemplates).pipe(
-            map(getFile),
+            map(getTemplate),
             tap(debugTemplates),
             flatMap(parseTemplates),
-            tap(printParsedFileLog),
+            tap(printParsedTemplateLog),
             toArray<IParsedTemplates>(),
             tap(scanForTemplates.scanMessage)
         ),

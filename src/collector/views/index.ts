@@ -1,17 +1,17 @@
 import { iif, Observable, from } from 'rxjs';
 import { map, flatMap, toArray, tap, take, mergeMap, scan as scanRx, filter } from 'rxjs/operators';
-import { getFile, IFile } from '../file';
+import { getView, IView } from './view';
 import { parseViews, IParsedViews } from './parser';
 import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
 import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
-import {printParsedFileLog} from "../log";
+import { printParsedTemplateLog } from './log';
 
 type TMergeMapResult = [TLevelRestriction, IParsedViews[]];
 export interface IParsedViewsResult { [key: string]: IParsedViews[] }
 
-const debugViews = createDebugger<IFile>('Collecting twigs', 'namespace', 'module', 'type', 'name');
+const debugViews = createDebugger<IView>('Collecting view', 'namespace', 'module', 'type', 'name');
 const logCollection = (level: string) => createLogger<IParsedViews[]>(`${level} Views:`, 'length');
 const scanForViews = (configSettings: IScanSettings) => (): Observable<string> => scan(configSettings);
 const scanForViewsCollection = [
@@ -42,10 +42,10 @@ const limitedScanForFilesCollection = scanForViews => iif(
 export const getObservable = (): Observable<IParsedViewsResult> => restrictedScanForTwigsCollection.pipe(
     mergeMap(scanForViews =>
         limitedScanForFilesCollection(scanForViews).pipe(
-            map(getFile),
+            map(getView),
             tap(debugViews),
             flatMap(parseViews),
-            tap(printParsedFileLog),
+            tap(printParsedTemplateLog),
             toArray<IParsedViews>(),
             tap(scanForViews.scanMessage)
         ),
