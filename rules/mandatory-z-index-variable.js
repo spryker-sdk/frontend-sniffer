@@ -1,5 +1,5 @@
 const { dim, bold } = require('colors');
-const { Rule } = require('../api');
+const { Rule, parseOutputFieldHelper } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -7,13 +7,14 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
-            const { sass } = component.files;
+        parseOutputFieldHelper(data.modules).forEach(component => {
+            const { files } = component;
 
-            if (!sass.exists) {
+            if (!files.sass || !files.sass.exists) {
                 return;
             }
 
+            const { sass } = files;
             const zIndexRegularExpression = /z-index:[\sA-Za-z0-9-\+\$]+[;}]/gi;
             const zIndexRules = sass.content.match(zIndexRegularExpression);
 

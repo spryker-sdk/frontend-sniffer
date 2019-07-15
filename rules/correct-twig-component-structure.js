@@ -14,6 +14,12 @@ module.exports = class extends Rule {
                 return;
             }
 
+            const isComponent = Boolean(type === 'atom') || Boolean(type === 'molecule') || Boolean(type === 'organism');
+
+            if (!isComponent) {
+                return;
+            }
+
             const { twig } = files;
             const { name: twigFileName, content, api } = twig;
             const configDefinition = api.external.definitions.filter(definition => definition.name === 'config')[0];

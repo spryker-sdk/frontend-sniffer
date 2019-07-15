@@ -11,7 +11,7 @@ module.exports = class extends Rule {
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { module, files, type, name, path } = component;
 
-            if (!files.sass.exists) {
+            if (!files.sass || !files.sass.exists) {
                 return;
             }
 
