@@ -6,7 +6,7 @@ import { config } from '../config';
 import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
 import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
-import { printParsedTemplateLog } from './log';
+import { printParsedViewLog } from './log';
 
 type TMergeMapResult = [TLevelRestriction, IParsedViews[]];
 export interface IParsedViewsResult { [key: string]: IParsedViews[] }
@@ -45,7 +45,7 @@ export const getObservable = (): Observable<IParsedViewsResult> => restrictedSca
             map(getView),
             tap(debugViews),
             flatMap(parseTwig),
-            tap(printParsedTemplateLog),
+            tap(printParsedViewLog),
             toArray<IParsedViews>(),
             tap(scanForViews.scanMessage)
         ),
