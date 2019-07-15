@@ -27,7 +27,7 @@ const scanForViewsCollection = [
     }
 ];
 
-const restrictedScanForTwigsCollection = iif(
+const restrictedScanForViewsCollection = iif(
     () => environment.isAllowedLevel,
     from(scanForViewsCollection).pipe(filter(item => item.scanLevel === environment.levelRestriction)),
     from(scanForViewsCollection)
@@ -39,7 +39,7 @@ const limitedScanForFilesCollection = scanForViews => iif(
     scanForViews.scanFunction()
 );
 
-export const getObservable = (): Observable<IParsedViewsResult> => restrictedScanForTwigsCollection.pipe(
+export const getObservable = (): Observable<IParsedViewsResult> => restrictedScanForViewsCollection.pipe(
     mergeMap(scanForViews =>
         limitedScanForFilesCollection(scanForViews).pipe(
             map(getView),
