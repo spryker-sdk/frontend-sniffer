@@ -1,6 +1,7 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import { IParserLog, IParserOutput, TParser } from './base';
+import { snifferDisabledRules } from './common';
 
 export interface ITag {
     name: string
@@ -411,18 +412,8 @@ export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = as
             }
         }
 
-        let test;
-        const snifferDisabledMatch = sourceFile.text.match(/\/*. fe-sniffer:disabled [^*]*\*\//);
-        const snifferDisabledString = Boolean(snifferDisabledMatch) ? snifferDisabledMatch[0] : null;
-        if (snifferDisabledString) {
-            const correctSnifferDisabledString = snifferDisabledString.replace(/\/\*|\*\//g, '').trim();
-            const snifferDisabledRules = correctSnifferDisabledString.split(' ');
-            snifferDisabledRules.shift();
-            test = snifferDisabledRules;
-        }
-
         return {
-            disabledSnifferRules: test,
+            disabledSnifferRules: snifferDisabledRules(sourceFile.text),
             content: null,
             api: {
                 external: {

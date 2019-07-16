@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { defaultErrorMessage, addError } = this.outcome;
+        const { errorMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
@@ -15,9 +15,14 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const { sass } = files;
+            const { disabledSnifferRules, content } = files.sass;
+
+            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
+                return;
+            }
+
             const zIndexRegularExpression = /z-index:[\sA-Za-z0-9-\+\$]+[;}]/gi;
-            const zIndexRules = sass.content.match(zIndexRegularExpression);
+            const zIndexRules = content.match(zIndexRegularExpression);
 
             if (!zIndexRules) {
                 return;
@@ -27,7 +32,7 @@ module.exports = class extends Rule {
                 const zIndexValue = rule.slice(rule.indexOf(':') + 1);
 
                 if (!isNaN(parseInt(zIndexValue))) {
-                    addError(defaultErrorMessage('Value of z-index property shouldn\'t be a number in', type, name, path));
+                    addError(errorMessage('Value of z-index property shouldn\'t be a number in', type, name, path));
                 }
             });
         });

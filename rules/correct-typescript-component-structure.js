@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { defaultErrorMessage, addError } = this.outcome;
+        const { errorMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
@@ -15,23 +15,15 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const {
-                typescript: {
-                    name: typescriptFileName,
-                    disabledSnifferRules,
-                    api: { external: { classes } }
-                }
-            } = files;
-            const isSnifferDisabled = Array.isArray(disabledSnifferRules) && (!Boolean(disabledSnifferRules.length) ||
-                disabledSnifferRules.includes(this.getName()));
+            const { name: typescriptFileName, disabledSnifferRules, api: { external: { classes } } } = files.typescript;
 
-            if (isSnifferDisabled) {
+            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
                 return;
             }
 
 
             if (name !== typescriptFileName.slice(0, typescriptFileName.lastIndexOf('.ts'))) {
-                addError(defaultErrorMessage('There is wrong name of typescript file in', type, name, path));
+                addError(errorMessage('There is wrong name of typescript file in', type, name, path));
             }
 
             classes.forEach(singleClass => {
@@ -40,7 +32,7 @@ module.exports = class extends Rule {
                 const convertedClassName = camelCaseToDash(className);
 
                 if (name !== convertedClassName) {
-                    addError(defaultErrorMessage('There is wrong class name in typescript file in', type, name, path));
+                    addError(errorMessage('There is wrong class name in typescript file in', type, name, path));
                 }
             });
         });

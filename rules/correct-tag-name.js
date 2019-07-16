@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
 const { htmlTags } = require('../config/html-tags');
 
 module.exports = class extends Rule {
@@ -7,7 +7,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { defaultErrorMessage, addError } = this.outcome;
+        const { errorMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { twig } = component.files;
@@ -16,7 +16,11 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const { definitions } = twig.api.external;
+            const { disabledSnifferRules, api: { external: { definitions } } } = twig;
+
+            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
+                return;
+            }
 
             definitions.forEach(definition => {
                 if (definition.name !== 'config') {
@@ -40,13 +44,13 @@ module.exports = class extends Rule {
                 const filteredHtmlTagArray = htmlTags.filter(tagData => (tagData.tagName === tagName && !tagData.single));
 
                 if (tagName === 'div') {
-                    addError(defaultErrorMessage('It shouldn\'t be tag property with div value in config of', type, name, path));
+                    addError(errorMessage('It shouldn\'t be tag property with div value in config of', type, name, path));
 
                     return;
                 }
 
                 if (!mandatorySymbolsRegularExpression.test(tagName)) {
-                    addError(defaultErrorMessage('The tag name must include only latin lowercase letters, arabic numerals and hyphens in', type, name, path));
+                    addError(errorMessage('The tag name must include only latin lowercase letters, arabic numerals and hyphens in', type, name, path));
 
                     return;
                 }
@@ -56,7 +60,7 @@ module.exports = class extends Rule {
                 }
 
                 if (!filteredHtmlTagArray.length || filteredHtmlTagArray[0].single) {
-                    addError(defaultErrorMessage('The tag name property should be valid pair html tag in', type, name, path));
+                    addError(errorMessage('The tag name property should be valid pair html tag in', type, name, path));
                 }
             })
         });

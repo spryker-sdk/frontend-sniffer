@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { IParserOutput, TParser } from './base';
+import {snifferDisabledRules} from "./common";
 
 export interface ICommentTag {
     name: string
@@ -215,6 +216,7 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
         const cleanedContent = removeTagsWithChildrenBlocks(content);
 
         return {
+            disabledSnifferRules: snifferDisabledRules(content),
             content,
             api: {
                 external: {
@@ -227,6 +229,7 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
         }
     } catch (error) {
         return {
+            disabledSnifferRules: null,
             content: null,
             api: {
                 external: null,
