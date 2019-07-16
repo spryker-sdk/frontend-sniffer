@@ -42,7 +42,7 @@ const limitedScanForFilesCollection = scanForComponents => iif(
 export const getObservable = (): Observable<IParsedComponentResult> => restrictedScanForComponentsCollection.pipe(
     mergeMap(scanForComponents =>
         limitedScanForFilesCollection(scanForComponents).pipe(
-            map(getComponent),
+            map((path: string) => getComponent(scanForComponents.scanLevel, path)),
             tap(debugComponent),
             flatMap(parseReadme),
             flatMap(parseDeprecated),

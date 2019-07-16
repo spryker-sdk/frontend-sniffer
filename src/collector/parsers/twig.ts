@@ -44,7 +44,7 @@ const allowedDefinitions = [
     'attributes'
 ];
 
-const contentRegex = /(\{|\}|\.|\n|\w|:|\s|t|,|\[|\]|\||\(|\)|(('|"|\{#).*('|"|#\}))|)+/;
+const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|(('|"|\{#).*('|"|#\}))|)+/;
 const defineNameRegex = new RegExp(`(?<=\\{%\\s+define\\s+)(${allowedDefinitions.join('|')})`, 'i');
 const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinitions.join('|')})\\s+=\\s+\\{`);
 const defineClosingTagRegex = /\}\s*%\}/;

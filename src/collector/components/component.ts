@@ -2,6 +2,7 @@ import { readdirSync } from 'fs';
 import { createHash } from 'crypto';
 import { join, dirname, basename } from 'path';
 import { IFile, getFile } from '../file';
+import { TLevelRestriction } from '../../environment';
 
 export enum EComponentType {
     Atom = 'atom',
@@ -17,6 +18,7 @@ export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S 
     type: EComponentType
     module: string
     isDeprecated: boolean
+    level: TLevelRestriction
     files: {
         _index: IFile
         _style: IFile
@@ -28,7 +30,7 @@ export interface IComponent<M extends IFile = IFile, W extends IFile = IFile, S 
     }
 }
 
-function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: string[]) {
+export function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: string[]) {
     const twigFileNameInComponent = directoryFiles.filter(fileName => fileName.includes('.twig'))[0];
     if (!directoryFiles.includes(defaultFileName) && twigFileNameInComponent) {
         return twigFileNameInComponent;
@@ -37,7 +39,7 @@ function extractCorrectTwigFileName(defaultFileName: string, directoryFiles: str
     return defaultFileName;
 }
 
-function extractCorrectScssFileName(defaultFileName: string, directoryFiles: string[]) {
+export function extractCorrectScssFileName(defaultFileName: string, directoryFiles: string[]) {
     const scssFileNameInComponent = directoryFiles.filter(fileName =>
         fileName.includes('.scss') && fileName !== 'style.scss'
     )[0];
@@ -61,7 +63,7 @@ function extractCorrectScriptFileName(defaultFileName: string, directoryFiles: s
     return defaultFileName;
 }
 
-export function getComponent(path: string): IComponent {
+export function getComponent(level: TLevelRestriction, path: string): IComponent {
     const name = basename(path);
     const deprecated = getFile(join(path, 'DEPRECATED.md'));
     const directoryFiles = readdirSync(path);
@@ -74,6 +76,7 @@ export function getComponent(path: string): IComponent {
         type: <EComponentType>basename(dirname(path)).slice(0, -1),
         module: basename(join(path, '../../../../..')),
         isDeprecated: deprecated.exists,
+        level,
         files: {
             _index: getFile(join(path, 'index.ts')),
             _style: getFile(join(path, 'style.scss')),

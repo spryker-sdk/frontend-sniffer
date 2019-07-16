@@ -11,7 +11,11 @@ import { info, createDebugger, warn } from '../logger';
 
 const debugRule = createDebugger<Rule>('Loading rule', 'name');
 export const parseOutputFieldHelper = (field: TCollectorObjectFields) =>
-    Object.values(field).reduce((accumulator, item) => [...accumulator, ...item], []);
+    Object.values(field).reduce((accumulator, item) => {
+        const currentItem = !Array.isArray(item) ? parseOutputFieldHelper(item) : item;
+
+        return [...accumulator, ...currentItem];
+    }, []);
 
 function testRules(output: ICollectorOutput): Observable<TestOutcome> {
     info.print('\nRunning sniffer...');

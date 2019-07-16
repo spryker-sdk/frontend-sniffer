@@ -7,8 +7,8 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        parseOutputFieldHelper(data.components).forEach(component => {
-            if (component.files.readme.exists) {
+        parseOutputFieldHelper(data.modules).forEach(component => {
+            if (!component.files.readme || component.files.readme.exists) {
                 return;
             }
 

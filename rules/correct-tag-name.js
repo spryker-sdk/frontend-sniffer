@@ -1,5 +1,5 @@
 const { dim, bold } = require('colors');
-const { Rule } = require('../api');
+const { Rule, parseOutputFieldHelper } = require('../api');
 const { htmlTags } = require('../config/html-tags');
 
 module.exports = class extends Rule {
@@ -8,7 +8,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
+        parseOutputFieldHelper(data.modules).forEach(component => {
             const { twig } = component.files;
 
             if (!twig.exists) {
