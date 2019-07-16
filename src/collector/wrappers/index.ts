@@ -4,14 +4,14 @@ import { IParsedViewsResult } from '../views';
 
 export interface IParsedModules {
     project?: {
-        [key: string]: IParsedModulesByName
+        [key: string]: IParsedModuleByName
     }
     core?: {
-        [key: string]: IParsedModulesByName
+        [key: string]: IParsedModuleByName
     }
 }
 
-interface IParsedModulesByName {
+interface IParsedModuleByName {
     template?: IParsedTemplates[]
     molecule?: IParsedComponent[]
     atom?: IParsedComponent[]
@@ -31,7 +31,7 @@ export function getModuleWrapper(components, templates, views): IParsedModules {
             const isModulesByNameExist: boolean = modules[moduleLevel] && modules[moduleLevel][moduleName];
             const isModulesByTypeExist: boolean = isModulesByNameExist && modules[moduleLevel][moduleName][`${moduleType}s`];
             const moduleByLevelData: IParsedModules = modules[moduleLevel] ? modules[moduleLevel] : [];
-            const moduleByNameData: IParsedModulesByName = isModulesByNameExist ? modules[moduleLevel][moduleName] : [];
+            const moduleByNameData: IParsedModuleByName = isModulesByNameExist ? modules[moduleLevel][moduleName] : [];
             const moduleByTypeData: TModulePart = isModulesByTypeExist ? modules[moduleLevel][moduleName][`${moduleType}s`]: [];
 
             modules = {
