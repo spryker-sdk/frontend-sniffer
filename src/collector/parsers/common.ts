@@ -13,6 +13,9 @@ export const snifferDisabledRules = (content: string): string[] => {
     return snifferDisabledRules;
 };
 
-export const isSnifferDisabled = (disabledSnifferRules: string[], ruleName): boolean =>
-    Array.isArray(disabledSnifferRules) && (!Boolean(disabledSnifferRules.length)
-    || disabledSnifferRules.includes(ruleName));
+export const isSnifferDisabled = (disabledSnifferRules: string[], ruleName): boolean => {
+    const disableAllRules = 'all';
+
+    return Array.isArray(disabledSnifferRules) && (disabledSnifferRules.includes(disableAllRules)
+        || disabledSnifferRules.includes(ruleName));
+};

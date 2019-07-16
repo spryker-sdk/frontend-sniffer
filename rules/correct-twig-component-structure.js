@@ -37,6 +37,13 @@ module.exports = class extends Rule {
             const extendStrings = content.match(/{%[' ']{0,}extends /);
             const configNameStringIndex  = configDefinition && configDefinition.contract.includes('name:');
             const extendsIndex = extendStrings && content.indexOf(extendStrings[0]);
+            const removeAllCommentsFromString = (content, extendsIndex) => {
+                const contentBeforeExtend = content.substring(0, extendsIndex);
+                const contentWithoutComments = contentBeforeExtend.replace(/\{*. [^#]* \#\}/g, '').trim();
+
+                return Boolean(contentWithoutComments.length);
+            };
+            const isCommentsBeforeExtend = extendsIndex ? removeAllCommentsFromString(content, extendsIndex) : false;
             let configName;
             let isAtomicDesignEntityExtension = false;
             let isModelComponentExtension = false;
@@ -76,7 +83,7 @@ module.exports = class extends Rule {
                 addError(errorMessage('It is no extends in twig file of', type, name, path));
             }
 
-            if (extendsIndex) {
+            if (extendsIndex && isCommentsBeforeExtend) {
                 addError(errorMessage('Twig file should begin with extend in', type, name, path));
             }
 
