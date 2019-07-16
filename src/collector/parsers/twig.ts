@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { IParserOutput, TParser } from './base';
-import {snifferDisabledRules} from "./common";
+import { snifferDisabledRules } from './common';
 
 export interface ICommentTag {
     name: string
