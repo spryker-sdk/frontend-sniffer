@@ -1,3 +1,4 @@
+const { dim, bold } = require('colors');
 
 export enum TestResult {
     SUCCEDED = 'succeded',
@@ -13,6 +14,7 @@ export class TestOutcome {
 
     constructor(ruleName: string) {
         this.ruleName = ruleName;
+        this.addError = this.addError.bind(this);
     }
 
     addLog(message: string): void {
@@ -25,6 +27,10 @@ export class TestOutcome {
 
     addError(message: string): void {
         this.errorMessages.push(message);
+    }
+
+    defaultErrorMessage(message: string, type: string, name: string, path: string): string {
+        return `${message} ${type} ${bold(name)}:\n${dim(path)}`;
     }
 
     get name(): string {

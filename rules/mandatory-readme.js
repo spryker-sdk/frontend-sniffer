@@ -1,4 +1,3 @@
-const { dim, bold } = require('colors');
 const { Rule, parseOutputFieldHelper } = require('../api');
 
 module.exports = class extends Rule {
@@ -7,12 +6,16 @@ module.exports = class extends Rule {
     }
 
     test(data) {
+        const { defaultErrorMessage, addError } = this.outcome;
+
         parseOutputFieldHelper(data.modules).forEach(component => {
-            if (!component.files.readme || component.files.readme.exists) {
+            const { files, type, name, path } = component;
+
+            if (!files.readme || files.readme.exists) {
                 return;
             }
 
-            this.outcome.addError(`README.md missing in ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
+            addError(defaultErrorMessage('README.md missing', type, name, path));
         });
     }
 }

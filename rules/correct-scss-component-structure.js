@@ -1,4 +1,3 @@
-const { dim, bold } = require('colors');
 const { Rule, parseOutputFieldHelper } = require('../api');
 const { stringify } = require('sast');
 
@@ -8,6 +7,8 @@ module.exports = class extends Rule {
     }
 
     test(data) {
+        const { defaultErrorMessage, addError } = this.outcome;
+
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { module, files, type, name, path } = component;
 
@@ -20,7 +21,7 @@ module.exports = class extends Rule {
             const { name: scssFileName } = sass;
 
             if (name !== scssFileName.slice(0, scssFileName.lastIndexOf('.scss'))) {
-                this.outcome.addError(`There is wrong name of scss file in ${type} ${bold(name)}:\n${dim(path)}`);
+                addError(defaultErrorMessage('There is wrong name of scss file in', type, name, path));
             }
 
             mixins.forEach((mixin, index) => {
@@ -32,23 +33,23 @@ module.exports = class extends Rule {
                 const convertedModuleName = camelCaseToDash(module);
 
                 if (!index && mixinName !== `${convertedModuleName}-${name}`) {
-                    this.outcome.addError(`name of the first mixin in file should consist of module name and component name in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(defaultErrorMessage('Name of the first mixin in file should consist of module name and component name in', type, name, path));
                 }
 
                 if (!mixinName.includes(name)) {
-                    this.outcome.addError(`There is wrong name of mixin in scss file of ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(defaultErrorMessage('There is wrong name of mixin in scss file of', type, name, path));
                 }
 
                 if (!hasContent) {
-                    this.outcome.addError(`There is no ${contentRule} in mixin of ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(defaultErrorMessage(`There is no ${contentRule} in mixin of`, type, name, path));
                 }
 
                 if (hasContent && contentRuleIndex !== convertedMixinText.lastIndexOf(contentRule)) {
-                    this.outcome.addError(`It should be only one ${contentRule} rule in mixin in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(defaultErrorMessage(`It should be only one ${contentRule} rule in mixin in`, type, name, path));
                 }
 
                 if (hasContent && /[a-z]+/.test(convertedMixinText.slice(contentRuleIndex + contentRule.length))) {
-                    this.outcome.addError(`It should be no rule after ${contentRule} rule in mixin in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(defaultErrorMessage(`It should be no rule after ${contentRule} rule in mixin in`, type, name, path));
                 }
             });
         });

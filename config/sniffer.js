@@ -16,5 +16,5 @@ module.exports = {
         }
     },
 
-    enable: []
+    enable: ['correct-typescript-component-structure']
 }

@@ -7,6 +7,7 @@ export interface IParserLog {
 }
 
 export interface IParserOutput<E = any, I = any> {
+    disabledSnifferRules?: string[]
     content: string
     api: {
         external: E

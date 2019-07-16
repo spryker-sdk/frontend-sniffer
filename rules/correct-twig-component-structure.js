@@ -1,4 +1,3 @@
-const { dim, bold } = require('colors');
 const { Rule, parseOutputFieldHelper } = require('../api');
 
 module.exports = class extends Rule {
@@ -7,9 +6,10 @@ module.exports = class extends Rule {
     }
 
     test(data) {
+        const { defaultErrorMessage, addError } = this.outcome;
+
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
-            const errorMessage = message => `${message} ${type} ${bold(name)}:\\n${dim(path)}`;
 
             if (!files.twig.exists) {
                 return;
@@ -49,35 +49,35 @@ module.exports = class extends Rule {
             }
 
             if (name !== twigFileName.slice(0, twigFileName.lastIndexOf('.twig'))) {
-                this.outcome.addError(errorMessage('There is wrong name of twig file in'));
+                addError(defaultErrorMessage('There is wrong name of twig file in', type, name, path));
             }
 
             if (!configDefinition) {
-                this.outcome.addError(errorMessage('There is no config block in twig file of'));
+                addError(defaultErrorMessage('There is no config block in twig file of', type, name, path));
             }
 
             if (configDefinition && !configNameStringIndex) {
-                this.outcome.addError(errorMessage('There is no name property in config block of'));
+                addError(defaultErrorMessage('There is no name property in config block of', type, name, path));
             }
 
             if (configName && configName !== name) {
-                this.outcome.addError(errorMessage('There is wrong name property in config block of twig file in'));
+                addError(defaultErrorMessage('There is wrong name property in config block of twig file in', type, name, path));
             }
 
             if (!extendStrings) {
-                this.outcome.addError(errorMessage('It is no extends in twig file of'));
+                addError(defaultErrorMessage('It is no extends in twig file of', type, name, path));
             }
 
             if (extendsIndex) {
-                this.outcome.addError(errorMessage('Twig file should begin with extend in'));
+                addError(defaultErrorMessage('Twig file should begin with extend in', type, name, path));
             }
 
             if (!isAtomicDesignEntityExtension && !isModelComponentExtension) {
-                this.outcome.addError(errorMessage('Component template should extend atom, molecule, organism or model component'));
+                addError(defaultErrorMessage('Component template should extend atom, molecule, organism or model component', type, name, path));
             }
 
             if (isModelComponentExtension && shouldBlockBodyExist) {
-                this.outcome.addError(errorMessage('If template extend model component and has blocks, block body must be in'));
+                addError(defaultErrorMessage('If template extend model component and has blocks, block body must be in', type, name, path));
             }
         });
     }
