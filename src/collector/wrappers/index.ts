@@ -1,6 +1,6 @@
 import { IParsedTemplates } from '../templates/parser';
 import { IParsedComponent } from '../components/parser';
-import { IParsedViewsResult } from '../views';
+import { IParsedViews } from '../views/parser';
 
 export interface IParsedModules {
     project?: {
@@ -16,10 +16,10 @@ interface IParsedModuleByName {
     molecule?: IParsedComponent[]
     atom?: IParsedComponent[]
     organism?: IParsedComponent[]
-    view?: IParsedViewsResult[]
+    view?: IParsedViews[]
 }
 
-type TModulePart = IParsedTemplates[] | IParsedComponent[] | IParsedViewsResult[];
+type TModulePart = IParsedTemplates[] | IParsedComponent[] | IParsedViews[];
 
 export function getModuleWrapper(components, templates, views): IParsedModules {
     let modules: IParsedModules = {};
