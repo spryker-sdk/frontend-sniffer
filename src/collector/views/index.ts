@@ -42,7 +42,7 @@ const limitedScanForFilesCollection = scanForViews => iif(
 export const getObservable = (): Observable<IParsedViewsResult> => restrictedScanForViewsCollection.pipe(
     mergeMap(scanForViews =>
         limitedScanForFilesCollection(scanForViews).pipe(
-            map(getView),
+            map(getView(scanForViews.scanLevel)),
             tap(debugViews),
             flatMap(parseTwig),
             tap(printParsedViewLog),

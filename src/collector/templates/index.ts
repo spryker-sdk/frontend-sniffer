@@ -42,7 +42,7 @@ const limitedScanForFilesCollection = scanForTemplates => iif(
 export const getObservable = (): Observable<IParsedTemplatesResult> => restrictedScanForTemplatesCollection.pipe(
     mergeMap(scanForTemplates =>
         limitedScanForFilesCollection(scanForTemplates).pipe(
-            map(getTemplate),
+            map(getTemplate(scanForTemplates.scanLevel)),
             tap(debugTemplates),
             flatMap(parseTwig),
             flatMap(parseSass),
