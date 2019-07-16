@@ -17,23 +17,21 @@ export interface IView<W extends IFile = IFile> {
     }
 }
 
-export function getView(level: TLevelRestriction) {
-    return function (path: string): IView {
-        const module = basename(join(path, '../../../..'));
-        const type = basename(dirname(path)).slice(0, -1);
-        const name = basename(path);
-        const directoryFiles = readdirSync(path);
+export function getView(level: TLevelRestriction, path: string): IView {
+    const module = basename(join(path, '../../../..'));
+    const type = basename(dirname(path)).slice(0, -1);
+    const name = basename(path);
+    const directoryFiles = readdirSync(path);
 
-        return {
-            id: createHash('md5').update(path).digest('hex'),
-            namespace: 'SprykerShop',
-            type,
-            module,
-            name,
-            level,
-            files: {
-                twig: getFile(join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles)))
-            }
+    return {
+        id: createHash('md5').update(path).digest('hex'),
+        namespace: 'SprykerShop',
+        type,
+        module,
+        name,
+        level,
+        files: {
+            twig: getFile(join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles)))
         }
     }
 }

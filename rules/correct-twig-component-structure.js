@@ -9,7 +9,7 @@ module.exports = class extends Rule {
     test(data) {
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
-            const errorMessage = (message) => `${message} ${type} ${bold(name)}:\\n${dim(path)}`;
+            const errorMessage = message => `${message} ${type} ${bold(name)}:\\n${dim(path)}`;
 
             if (!files.twig.exists) {
                 return;

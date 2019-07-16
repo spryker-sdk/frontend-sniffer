@@ -12,10 +12,10 @@ export interface IParsedModules {
 }
 
 interface IParsedModuleByName {
-    template?: IParsedTemplates[]
-    molecule?: IParsedComponent[]
     atom?: IParsedComponent[]
+    molecule?: IParsedComponent[]
     organism?: IParsedComponent[]
+    template?: IParsedTemplates[]
     view?: IParsedViews[]
 }
 
@@ -25,7 +25,7 @@ export function getModuleWrapper(components, templates, views): IParsedModules {
     let modules: IParsedModules = {};
     const moduleCreation = (modulePart: TModulePart) => {
         const moduleLevels: string[] = Object.keys(modulePart);
-        const modulesByName = (modulesByLevel, moduleLevel) =>  modulesByLevel.forEach((moduleByLevel) => {
+        const modulesByName = (modulesByLevel, moduleLevel) =>  modulesByLevel.forEach(moduleByLevel => {
             const moduleName: string = moduleByLevel['module'];
             const moduleType: string = moduleByLevel['type'];
             const isModulesByNameExist: boolean = modules[moduleLevel] && modules[moduleLevel][moduleName];

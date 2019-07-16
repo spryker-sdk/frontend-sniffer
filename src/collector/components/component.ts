@@ -63,30 +63,28 @@ function extractCorrectScriptFileName(defaultFileName: string, directoryFiles: s
     return defaultFileName;
 }
 
-export function getComponent(level: TLevelRestriction) {
-    return function (path: string): IComponent {
-        const name = basename(path);
-        const deprecated = getFile(join(path, 'DEPRECATED.md'));
-        const directoryFiles = readdirSync(path);
+export function getComponent(level: TLevelRestriction, path: string): IComponent {
+    const name = basename(path);
+    const deprecated = getFile(join(path, 'DEPRECATED.md'));
+    const directoryFiles = readdirSync(path);
 
-        return {
-            id: createHash('md5').update(path).digest('hex'),
-            namespace: 'SprykerShop',
-            path,
-            name,
-            type: <EComponentType>basename(dirname(path)).slice(0, -1),
-            module: basename(join(path, '../../../../..')),
-            isDeprecated: deprecated.exists,
-            level,
-            files: {
-                _index: getFile(join(path, 'index.ts')),
-                _style: getFile(join(path, 'style.scss')),
-                deprecated,
-                readme: getFile(join(path, 'README.md')),
-                twig: getFile(join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles))),
-                sass: getFile(join(path, extractCorrectScssFileName(`${name}.scss`, directoryFiles))),
-                typescript: getFile(join(path, extractCorrectScriptFileName(`${name}.ts`, directoryFiles))),
-            }
+    return {
+        id: createHash('md5').update(path).digest('hex'),
+        namespace: 'SprykerShop',
+        path,
+        name,
+        type: <EComponentType>basename(dirname(path)).slice(0, -1),
+        module: basename(join(path, '../../../../..')),
+        isDeprecated: deprecated.exists,
+        level,
+        files: {
+            _index: getFile(join(path, 'index.ts')),
+            _style: getFile(join(path, 'style.scss')),
+            deprecated,
+            readme: getFile(join(path, 'README.md')),
+            twig: getFile(join(path, extractCorrectTwigFileName(`${name}.twig`, directoryFiles))),
+            sass: getFile(join(path, extractCorrectScssFileName(`${name}.scss`, directoryFiles))),
+            typescript: getFile(join(path, extractCorrectScriptFileName(`${name}.ts`, directoryFiles))),
         }
     }
 }

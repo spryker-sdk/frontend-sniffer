@@ -16,16 +16,14 @@ export interface IStyleFile extends IParsedFile<ISassApi> {
     level: TLevelRestriction
 }
 
-export function parseSass(level: TLevelRestriction) {
-    return async function (file: IFile): Promise<IStyleFile> {
-        const type: EStyleType = <EStyleType>basename(dirname(file.path)).slice(0, -1);
-        const output: IParserOutput<ISassApi> = await parse(file.path);
+export async function parseSass(level: TLevelRestriction, file: IFile): Promise<IStyleFile> {
+    const type: EStyleType = <EStyleType>basename(dirname(file.path)).slice(0, -1);
+    const output: IParserOutput<ISassApi> = await parse(file.path);
 
-        return {
-            ...file,
-            ...output,
-            type,
-            level
-        }
+    return {
+        ...file,
+        ...output,
+        type,
+        level
     }
 }

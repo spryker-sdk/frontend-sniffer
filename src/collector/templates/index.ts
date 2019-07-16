@@ -7,6 +7,7 @@ import { IScanSettings, scan } from '../../scanner';
 import { createDebugger, createLogger } from '../../logger';
 import { environment, coreLevel, projectLevel, TLevelRestriction } from '../../environment';
 import { printParsedTemplateLog } from './log';
+import {getView} from "../views/view";
 
 type TMergeMapResult = [TLevelRestriction, IParsedTemplates[]];
 export interface IParsedTemplatesResult { [key: string]: IParsedTemplates[] }
@@ -42,7 +43,7 @@ const limitedScanForFilesCollection = scanForTemplates => iif(
 export const getObservable = (): Observable<IParsedTemplatesResult> => restrictedScanForTemplatesCollection.pipe(
     mergeMap(scanForTemplates =>
         limitedScanForFilesCollection(scanForTemplates).pipe(
-            map(getTemplate(scanForTemplates.scanLevel)),
+            map((path: string) => getTemplate(scanForTemplates.scanLevel, path)),
             tap(debugTemplates),
             flatMap(parseTwig),
             flatMap(parseSass),

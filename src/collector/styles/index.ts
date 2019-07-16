@@ -44,7 +44,7 @@ export const getObservable = (): Observable<IStyleFilesResult> => restrictedScan
         limitedScanForFilesCollection(scanForFiles).pipe(
             map(getFile),
             tap(debugFile),
-            flatMap(parseSass(scanForFiles.scanLevel)),
+            flatMap((file: IFile) => parseSass(scanForFiles.scanLevel, file)),
             tap(printParsedFileLog),
             toArray<IStyleFile>(),
             tap(scanForFiles.scanMessage)
