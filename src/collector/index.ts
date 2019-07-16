@@ -39,7 +39,7 @@ export const collect = (): Promise<ICollectorOutput> => new Promise<any>((resolv
         views: getViewsObservable(),
     }).subscribe((observableOutput: TCollectorObservableOutput) => {
         const { components, templates, views } = observableOutput;
-        const modules = getModuleWrapper(components, templates, views);
+        const modules: IParsedModules = getModuleWrapper(components, templates, views);
 
         return resolve({
             applicationFiles: observableOutput.applicationFiles,

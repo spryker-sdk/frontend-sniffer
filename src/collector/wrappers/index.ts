@@ -23,18 +23,20 @@ export interface IParsedModules {
     }
 }
 
+type TModulePart = IParsedTemplates[] | IParsedComponent[] | IParsedViewsResult[];
+
 export function getModuleWrapper(components, templates, views): IParsedModules {
-    let modules = {};
-    const moduleCreation = (modulePart) => {
-        const moduleLevels = Object.keys(modulePart);
+    let modules: IParsedModules = {};
+    const moduleCreation = (modulePart: TModulePart) => {
+        const moduleLevels: string[] = Object.keys(modulePart);
         const modulesByName = (modulesByLevel, moduleLevel) =>  modulesByLevel.forEach((moduleByLevel) => {
-            const moduleName = moduleByLevel['module'];
-            const moduleType = moduleByLevel['type'];
-            const isModulesByNameExist = modules[moduleLevel] && modules[moduleLevel][moduleName];
-            const isModulesByTypeExist = isModulesByNameExist && modules[moduleLevel][moduleName][`${moduleType}s`];
-            const moduleByLevelData = modules[moduleLevel] ? modules[moduleLevel] : [];
-            const moduleByNameData = isModulesByNameExist ? modules[moduleLevel][moduleName] : [];
-            const moduleByTypeData = isModulesByTypeExist ? modules[moduleLevel][moduleName][`${moduleType}s`]: [];
+            const moduleName: string = moduleByLevel['module'];
+            const moduleType: string = moduleByLevel['type'];
+            const isModulesByNameExist: boolean = modules[moduleLevel] && modules[moduleLevel][moduleName];
+            const isModulesByTypeExist: boolean = isModulesByNameExist && modules[moduleLevel][moduleName][`${moduleType}s`];
+            const moduleByLevelData: IParsedModules = modules[moduleLevel] ? modules[moduleLevel] : [];
+            const moduleByNameData: IParsedModules = isModulesByNameExist ? modules[moduleLevel][moduleName] : [];
+            const moduleByTypeData: TModulePart = isModulesByTypeExist ? modules[moduleLevel][moduleName][`${moduleType}s`]: [];
 
             modules = {
                 ...modules,
@@ -51,7 +53,7 @@ export function getModuleWrapper(components, templates, views): IParsedModules {
             }
         });
 
-        moduleLevels.forEach(moduleLevel => modulesByName(modulePart[moduleLevel], moduleLevel));
+        moduleLevels.forEach((moduleLevel: string) => modulesByName(modulePart[moduleLevel], moduleLevel));
     };
 
     moduleCreation(components);
