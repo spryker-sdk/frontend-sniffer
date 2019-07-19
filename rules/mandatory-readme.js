@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { errorMessage, addError } = this.outcome;
+        const { formatMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
@@ -15,7 +15,7 @@ module.exports = class extends Rule {
                 return;
             }
 
-            addError(errorMessage('README.md missing', type, name, path));
+            addError(formatMessage('README.md missing', type, name, path));
         });
     }
 }

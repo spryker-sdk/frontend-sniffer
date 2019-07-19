@@ -29,7 +29,7 @@ export class TestOutcome {
         this.errorMessages.push(message);
     }
 
-    errorMessage(message: string, type: string, name: string, path: string): string {
+    formatMessage(message: string, type: string, name: string, path: string): string {
         return `${message} ${type} ${bold(name)}:\n${dim(path)}`;
     }
 

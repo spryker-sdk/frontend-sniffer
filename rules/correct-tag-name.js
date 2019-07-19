@@ -7,7 +7,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { errorMessage, addError } = this.outcome;
+        const { formatMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { twig } = component.files;
@@ -16,7 +16,8 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const { disabledSnifferRules, api: { external: { definitions } } } = twig;
+            const { disabledSnifferRules, api } = twig;
+            const { definitions } = api.external;
 
             if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
                 return;
@@ -44,13 +45,13 @@ module.exports = class extends Rule {
                 const filteredHtmlTagArray = htmlTags.filter(tagData => (tagData.tagName === tagName && !tagData.single));
 
                 if (tagName === 'div') {
-                    addError(errorMessage('It shouldn\'t be tag property with div value in config of', type, name, path));
+                    addError(formatMessage('It shouldn\'t be tag property with div value in config of', type, name, path));
 
                     return;
                 }
 
                 if (!mandatorySymbolsRegularExpression.test(tagName)) {
-                    addError(errorMessage('The tag name must include only latin lowercase letters, arabic numerals and hyphens in', type, name, path));
+                    addError(formatMessage('The tag name must include only latin lowercase letters, arabic numerals and hyphens in', type, name, path));
 
                     return;
                 }
@@ -60,7 +61,7 @@ module.exports = class extends Rule {
                 }
 
                 if (!filteredHtmlTagArray.length || filteredHtmlTagArray[0].single) {
-                    addError(errorMessage('The tag name property should be valid pair html tag in', type, name, path));
+                    addError(formatMessage('The tag name property should be valid pair html tag in', type, name, path));
                 }
             })
         });

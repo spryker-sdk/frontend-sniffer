@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { errorMessage, addError } = this.outcome;
+        const { formatMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
@@ -32,7 +32,7 @@ module.exports = class extends Rule {
                 const zIndexValue = rule.slice(rule.indexOf(':') + 1);
 
                 if (!isNaN(parseInt(zIndexValue))) {
-                    addError(errorMessage('Value of z-index property shouldn\'t be a number in', type, name, path));
+                    addError(formatMessage('Value of z-index property shouldn\'t be a number in', type, name, path));
                 }
             });
         });

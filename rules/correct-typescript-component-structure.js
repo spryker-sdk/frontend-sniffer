@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        const { errorMessage, addError } = this.outcome;
+        const { formatMessage, addError } = this.outcome;
 
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
@@ -15,7 +15,8 @@ module.exports = class extends Rule {
                 return;
             }
 
-            const { name: typescriptFileName, disabledSnifferRules, api: { external: { classes } } } = files.typescript;
+            const { name: typescriptFileName, disabledSnifferRules, api } = files.typescript;
+            const { classes } = api.external;
 
             if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
                 return;
@@ -23,7 +24,7 @@ module.exports = class extends Rule {
 
 
             if (name !== typescriptFileName.slice(0, typescriptFileName.lastIndexOf('.ts'))) {
-                addError(errorMessage('There is wrong name of typescript file in', type, name, path));
+                addError(formatMessage('There is wrong name of typescript file in', type, name, path));
             }
 
             classes.forEach(singleClass => {
@@ -32,7 +33,7 @@ module.exports = class extends Rule {
                 const convertedClassName = camelCaseToDash(className);
 
                 if (name !== convertedClassName) {
-                    addError(errorMessage('There is wrong class name in typescript file in', type, name, path));
+                    addError(formatMessage('There is wrong class name in typescript file in', type, name, path));
                 }
             });
         });
