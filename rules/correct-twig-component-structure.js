@@ -8,7 +8,6 @@ module.exports = class extends Rule {
     test(data) {
         const { formatMessage, addError } = this.outcome;
 
-        this.testModules()
         parseOutputFieldHelper(data.modules).forEach(component => {
             const { files, type, name, path } = component;
 
