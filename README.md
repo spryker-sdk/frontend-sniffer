@@ -17,7 +17,7 @@ technologies to better understand how the sniffer works.
 2. yarn build
 # Turn on with watcher
 3. yarn watch
-4. yarn sniff - to run sniffer inside your project (Need to set up current path inside bin/frontend-sniffer or use "-p [absolute project path]" option
+4. yarn sniff - to run sniffer inside your project (Need to set up current path inside bin/frontend-sniffer or use "-p [absolute project path]" option)
 ```
 
 ## Configuration
