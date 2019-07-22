@@ -7,6 +7,7 @@ import is from 'unist-util-is';
 import find from 'unist-util-find';
 import findBefore from 'unist-util-find-before';
 import { IParserOutput, TParser } from './base';
+import { snifferDisabledRules } from './common';
 
 export interface ISassApi {
     variables: any[]
@@ -347,6 +348,7 @@ export const parse: TParser<ISassApi> = async (file: string): Promise<IParserOut
         const stylesheetNode = parseSass(content, { syntax: 'scss' });
 
         return {
+            disabledSnifferRules: snifferDisabledRules(content),
             content,
             api: {
                 external: {
@@ -361,6 +363,7 @@ export const parse: TParser<ISassApi> = async (file: string): Promise<IParserOut
         }
     } catch (error) {
         return {
+            disabledSnifferRules: null,
             content: null,
             api: {
                 external: null,

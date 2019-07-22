@@ -1,5 +1,4 @@
-const { dim, bold } = require('colors');
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -7,16 +6,14 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        parseOutputFieldHelper(data.modules).forEach(component => {
-            const { files } = component;
+        const { formatMessage, addError } = this.outcome;
 
-            if (!files.sass || !files.sass.exists) {
-                return;
-            }
+        this.filterModulesData(data, 'sass').forEach(component => {
+            const { files, type, name, path } = component;
+            const { content } = files.sass;
 
-            const { sass } = files;
             const zIndexRegularExpression = /z-index:[\sA-Za-z0-9-\+\$]+[;}]/gi;
-            const zIndexRules = sass.content.match(zIndexRegularExpression);
+            const zIndexRules = content.match(zIndexRegularExpression);
 
             if (!zIndexRules) {
                 return;
@@ -26,7 +23,7 @@ module.exports = class extends Rule {
                 const zIndexValue = rule.slice(rule.indexOf(':') + 1);
 
                 if (!isNaN(parseInt(zIndexValue))) {
-                    this.outcome.addError(`Value of z-index property shouldn't be a number in ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
+                    addError(formatMessage('Value of z-index property shouldn\'t be a number in', type, name, path));
                 }
             });
         });

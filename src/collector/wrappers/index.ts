@@ -19,7 +19,7 @@ interface IParsedModuleByName {
     view?: IParsedViews[]
 }
 
-type TModulePart = IParsedTemplates[] | IParsedComponent[] | IParsedViews[];
+export type TModulePart = IParsedTemplates[] | IParsedComponent[] | IParsedViews[];
 
 export function getModuleWrapper(components, templates, views): IParsedModules {
     let modules: IParsedModules = {};

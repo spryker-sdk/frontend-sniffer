@@ -9,8 +9,6 @@ import { IStyleFile } from './styles/parser';
 import { getModuleWrapper, IParsedModules } from './wrappers';
 import { info } from '../logger';
 
-export type TCollectorObjectFields = IStyleFilesResult | IParsedComponentResult;
-
 export type TCollectorObservableOutput = {
     applicationFiles: IApplicationFile[]
     styleFiles: IStyleFilesResult

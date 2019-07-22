@@ -1,6 +1,7 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import { IParserLog, IParserOutput, TParser } from './base';
+import { snifferDisabledRules } from './common';
 
 export interface ITag {
     name: string
@@ -395,6 +396,7 @@ export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = as
 
         if (!sourceFile) {
             return {
+                disabledSnifferRules: null,
                 content: null,
                 api: {
                     external: null,
@@ -411,6 +413,7 @@ export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = as
         }
 
         return {
+            disabledSnifferRules: snifferDisabledRules(sourceFile.text),
             content: null,
             api: {
                 external: {
@@ -425,6 +428,7 @@ export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = as
         }
     } catch (error) {
         return {
+            disabledSnifferRules: null,
             content: null,
             api: {
                 external: null,

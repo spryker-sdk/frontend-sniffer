@@ -1,5 +1,4 @@
-const { dim, bold } = require('colors');
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -7,20 +6,21 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        parseOutputFieldHelper(data.modules).forEach(component => {
+        const { formatMessage, addError } = this.outcome;
+
+        this.filterModulesData(data, 'typescript').forEach(component => {
             const { files, type, name, path } = component;
 
-            if (!files.typescript || !files.typescript.exists || !files.typescript.api.external) {
+            if(!files.typescript.api.external) {
                 return;
             }
 
-            const { typescript } = files;
-            const { external } = typescript.api;
-            const { classes } = external;
-            const { name: typescriptFileName } = typescript;
+            const { name: typescriptFileName, api } = files.typescript;
+            const { classes } = api.external;
+
 
             if (name !== typescriptFileName.slice(0, typescriptFileName.lastIndexOf('.ts'))) {
-                this.outcome.addError(`There is wrong name of typescript file in ${type} ${bold(name)}:\n${dim(path)}`);
+                addError(formatMessage('There is wrong name of typescript file in', type, name, path));
             }
 
             classes.forEach(singleClass => {
@@ -29,7 +29,7 @@ module.exports = class extends Rule {
                 const convertedClassName = camelCaseToDash(className);
 
                 if (name !== convertedClassName) {
-                    this.outcome.addError(`There is wrong class name in typescript file in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(formatMessage('There is wrong class name in typescript file in', type, name, path));
                 }
             });
         });

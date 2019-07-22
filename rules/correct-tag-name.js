@@ -1,5 +1,4 @@
-const { dim, bold } = require('colors');
-const { Rule, parseOutputFieldHelper } = require('../api');
+const { Rule } = require('../api');
 const { htmlTags } = require('../config/html-tags');
 
 module.exports = class extends Rule {
@@ -8,14 +7,10 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        parseOutputFieldHelper(data.modules).forEach(component => {
-            const { twig } = component.files;
+        const { formatMessage, addError } = this.outcome;
 
-            if (!twig.exists) {
-                return;
-            }
-
-            const { definitions } = twig.api.external;
+        this.filterModulesData(data, 'twig').forEach(component => {
+            const { definitions } = component.files.twig.api.external;
 
             definitions.forEach(definition => {
                 if (definition.name !== 'config') {
@@ -39,13 +34,13 @@ module.exports = class extends Rule {
                 const filteredHtmlTagArray = htmlTags.filter(tagData => (tagData.tagName === tagName && !tagData.single));
 
                 if (tagName === 'div') {
-                    this.outcome.addError(`It shouldn't be tag property with div value in config of ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(formatMessage('It shouldn\'t be tag property with div value in config of', type, name, path));
 
                     return;
                 }
 
                 if (!mandatorySymbolsRegularExpression.test(tagName)) {
-                    this.outcome.addError(`The tag name must include only latin lowercase letters, arabic numerals and hyphens in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(formatMessage('The tag name must include only latin lowercase letters, arabic numerals and hyphens in', type, name, path));
 
                     return;
                 }
@@ -55,7 +50,7 @@ module.exports = class extends Rule {
                 }
 
                 if (!filteredHtmlTagArray.length || filteredHtmlTagArray[0].single) {
-                    this.outcome.addError(`The tag name property should be valid pair html tag in ${type} ${bold(name)}:\n${dim(path)}`);
+                    addError(formatMessage('The tag name property should be valid pair html tag in', type, name, path));
                 }
             })
         });
