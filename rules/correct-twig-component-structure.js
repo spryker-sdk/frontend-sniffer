@@ -83,7 +83,6 @@ module.exports = class extends Rule {
             }
 
             if (isModelComponentExtension && shouldBlockBodyExist) {
-                console.log(blocks);
                 this.outcome.addError(errorMessage('If template extend model component and has blocks, block body must be in'));
             }
         });
