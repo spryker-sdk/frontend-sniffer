@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
+const { Rule } = require('../api');
 const { stringify } = require('sast');
 
 module.exports = class extends Rule {
@@ -9,19 +9,10 @@ module.exports = class extends Rule {
     test(data) {
         const { formatMessage, addError } = this.outcome;
 
-        parseOutputFieldHelper(data.modules).forEach(component => {
+        this.filterModulesData(data, 'sass').forEach(component => {
             const { module, files, type, name, path } = component;
-
-            if (!files.sass || !files.sass.exists) {
-                return;
-            }
-
-            const { disabledSnifferRules, name: scssFileName, api } = files.sass;
+            const { name: scssFileName, api } = files.sass;
             const { mixins } = api.external;
-
-            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
-                return;
-            }
 
             if (name !== scssFileName.slice(0, scssFileName.lastIndexOf('.scss'))) {
                 addError(formatMessage('There is wrong name of scss file in', type, name, path));

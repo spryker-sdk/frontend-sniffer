@@ -16,5 +16,5 @@ module.exports = {
         }
     },
 
-    enable: []
-}
+    enable: ['correct-tag-name', 'correct-twig-component-structure', 'correct-scss-component-structure', 'correct-typescript-component-structure', 'mandatory-z-index-variable', 'mandatory-readme', 'deprecation-warning']
+};

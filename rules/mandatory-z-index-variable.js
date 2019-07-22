@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
+const { Rule } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -8,18 +8,9 @@ module.exports = class extends Rule {
     test(data) {
         const { formatMessage, addError } = this.outcome;
 
-        parseOutputFieldHelper(data.modules).forEach(component => {
+        this.filterModulesData(data, 'sass').forEach(component => {
             const { files, type, name, path } = component;
-
-            if (!files.sass || !files.sass.exists) {
-                return;
-            }
-
-            const { disabledSnifferRules, content } = files.sass;
-
-            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
-                return;
-            }
+            const { content } = files.sass;
 
             const zIndexRegularExpression = /z-index:[\sA-Za-z0-9-\+\$]+[;}]/gi;
             const zIndexRules = content.match(zIndexRegularExpression);

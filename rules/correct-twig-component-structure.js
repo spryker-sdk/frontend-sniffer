@@ -1,4 +1,4 @@
-const { Rule, parseOutputFieldHelper, isSnifferDisabled } = require('../api');
+const { Rule } = require('../api');
 
 module.exports = class extends Rule {
     getName() {
@@ -8,25 +8,16 @@ module.exports = class extends Rule {
     test(data) {
         const { formatMessage, addError } = this.outcome;
 
-        parseOutputFieldHelper(data.modules).forEach(component => {
+        this.filterModulesData(data, 'twig').forEach(component => {
             const { files, type, name, path } = component;
-
-            if (!files.twig.exists) {
-                return;
-            }
-
             const isComponent = Boolean(type === 'atom') || Boolean(type === 'molecule') || Boolean(type === 'organism');
 
             if (!isComponent) {
                 return;
             }
 
-            const { disabledSnifferRules, name: twigFileName, content, api } = files.twig;
+            const { name: twigFileName, content, api } = files.twig;
             const { definitions, blocks } = api.external;
-
-            if (isSnifferDisabled(disabledSnifferRules, this.getName())) {
-                return;
-            }
 
             const blocksByName = (blockName) => definitions.filter(definition => definition.name === blockName);
             const configDefinition = blocksByName('config')[0];
