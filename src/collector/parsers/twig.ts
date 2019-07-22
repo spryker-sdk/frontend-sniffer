@@ -45,15 +45,15 @@ const allowedDefinitions = [
     'attributes'
 ];
 
-const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|(('|"|\{#).*('|"|#\}))|)+/;
+const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|\?|(('|"|\{#).*('|"|#\}))|)+/;
 const defineNameRegex = new RegExp(`(?<=\\{%\\s+define\\s+)(${allowedDefinitions.join('|')})`, 'i');
 const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinitions.join('|')})\\s+=\\s+\\{`);
 const defineClosingTagRegex = /\}\s*%\}/;
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
 
-const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*block.+%\}/gmi;
-const blockNameRegex = /(?<=\{%\s*block\s+)\w+(?=\s*%\})/gmi;
+const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%(\s|-)*block.+%\}/gmi;
+const blockNameRegex = /(?<=\{%(\s|-)*block\s+)\w+(?=(\s|-)*%\})/gmi;
 const macroAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*macro.+%\}/gmi;
 const macroSignatureRegex = /(?<=\{%\s*macro\s+)(\w|\(|\)|\s|,)+(?=\s*%\})/gmi;
 const commentRegex = /(?<=\{#)(.|\n)+(?=#\})/gmi;
