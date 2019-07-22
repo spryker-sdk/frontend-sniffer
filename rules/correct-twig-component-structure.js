@@ -25,7 +25,13 @@ module.exports = class extends Rule {
             const { name: twigFileName, content, api } = twig;
             const configDefinition = api.external.definitions.filter(definition => definition.name === 'config')[0];
             const blocks = api.external.blocks;
-            const shouldBlockBodyExist = blocks.length ? !blocks.filter(block => block.name === 'body').length : false;
+            const excludedBlocks = {
+                component: true,
+                class: true,
+                attributes: true,
+            };
+            const notExcludedBlocks = blocks.filter(block => !excludedBlocks[block.name]);
+            const shouldBlockBodyExist = notExcludedBlocks.length ? !notExcludedBlocks.filter(block => block.name === 'body').length : false;
             const extendStrings = content.match(/{%[' ']{0,}extends /);
             const configNameStringIndex  = configDefinition && configDefinition.contract.includes('name:');
             const extendsIndex = extendStrings && content.indexOf(extendStrings[0]);
@@ -77,6 +83,7 @@ module.exports = class extends Rule {
             }
 
             if (isModelComponentExtension && shouldBlockBodyExist) {
+                console.log(blocks);
                 this.outcome.addError(errorMessage('If template extend model component and has blocks, block body must be in'));
             }
         });
