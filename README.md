@@ -49,7 +49,7 @@ Options:
   -l, --level-restriction [level]   collect core or project level only (default: null)
 
 Example:
-Run snifferfor 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
+Run sniffer for 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
 yarn sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
 ```
 
