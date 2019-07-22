@@ -26,18 +26,6 @@ Collector and sniffer use 2 different configurations:
 - [collector](https://github.com/spryker-sdk/frontend-sniffer/blob/master/config/collector.js)
 - [sniffer](https://github.com/spryker-sdk/frontend-sniffer/blob/master/config/sniffer.js)
 
-Each configuration has a default filename:
-
-- collector: `frontend-sniffer.collector.config.js`
-- sniffer: `frontend-sniffer.config.js`
-
-You can override them by:
-
-- run `frontend-sniffer --config ./path/to/config/file.js`
-- run `frontend-sniffer --config ./path/to/config/folder`, where the folder contains a default configuration filename
-- place a configuaration with default filename in your target path
-- place a configuaration with default filename in your current path
-
 Each option will be evaluated by the tool, and if no configuration is found, the default one will be used.
 
 ## Terminal usage
@@ -61,7 +49,7 @@ Options:
   -l, --level-restriction [level]   collect core or project level only (default: null)
 
 Example:
-Run sniff for 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
+Run snifferfor 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
 yarn sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
 ```
 
