@@ -12,18 +12,14 @@ export abstract class Rule {
         this.filterModulesData = this.filterModulesData.bind(this);
     }
 
-    get isSkipped(): boolean {
-        return config.settings.enable.includes(this.getName());
-    }
-
-    isSnifferDisabled(disabledSnifferRules: string[]): boolean {
+    protected isSnifferDisabled(disabledSnifferRules: string[]): boolean {
         const disableAllRules = 'all';
 
         return Array.isArray(disabledSnifferRules) && (disabledSnifferRules.includes(disableAllRules) ||
             disabledSnifferRules.includes(this.getName()));
     };
 
-    parseOutputFieldHelper(data: IParsedModules): TModulePart {
+    protected parseOutputFieldHelper(data: IParsedModules): TModulePart {
         const stack = [...Object.values(data)];
         const collectionOfFiles = [];
 
@@ -42,10 +38,14 @@ export abstract class Rule {
         return collectionOfFiles.reduce((accumulator, current) => [...accumulator, ...current],[]);
     };
 
-    filterModulesData(data: ICollectorOutput, fileType: string): TModulePart {
+    protected filterModulesData(data: ICollectorOutput, fileType: string): TModulePart {
         return this.parseOutputFieldHelper(data.modules)
             .filter(module => module.files[fileType] && module.files[fileType]['exists'])
             .filter(module => !this.isSnifferDisabled(module.files[fileType].disabledSnifferRules));
+    }
+
+    get isSkipped(): boolean {
+        return config.settings.enable.includes(this.getName());
     }
 
     abstract getName(): string
