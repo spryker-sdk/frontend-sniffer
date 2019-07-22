@@ -21,7 +21,13 @@ module.exports = class extends Rule {
 
             const blocksByName = (blockName) => definitions.filter(definition => definition.name === blockName);
             const configDefinition = blocksByName('config')[0];
-            const shouldBlockBodyExist = blocks.length ? !blocks.filter(block => block.name === 'body').length : false;
+            const excludedBlocks = {
+                component: true,
+                class: true,
+                attributes: true,
+            };
+            const notExcludedBlocks = blocks.filter(block => !excludedBlocks[block.name]);
+            const shouldBlockBodyExist = notExcludedBlocks.length ? !notExcludedBlocks.filter(block => block.name === 'body').length : false;
             const extendStrings = content.match(/{%[' ']{0,}extends /);
             const configNameStringIndex  = configDefinition && configDefinition.contract.includes('name:');
             const extendsIndex = extendStrings && content.indexOf(extendStrings[0]);
