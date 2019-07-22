@@ -6,18 +6,18 @@ This software has been specifically design for Spryker projects and it performs 
 The application is heavily based Typescript (especially generics) and RxJs. Please get familiar with this
 technologies to better understand how the sniffer works.
 
-- [typescript generics](https://www.typescriptlang.org/docs/handbook/generics.html)
+- [Typescript generics](https://www.typescriptlang.org/docs/handbook/generics.html)
 - [RxJs](https://rxjs.dev/)
 
 ## Setup
 **Note**: prefer `yarn` over `npm` when working on this project.
 
 ```bash
-#install as global tool
-yarn global add  git+https://github.com/spryker-sdk/frontend-sniffer.git#semver:^0.1.0
-
-# install as a dependecy in your project
-yarn add git+https://github.com/spryker-sdk/frontend-sniffer.git#semver:^0.1.0
+1. yarn install
+2. yarn build
+# Turn on with watcher
+3. yarn watch
+4. yarn sniff - to run sniffer inside your project (Need to set up current path inside bin/frontend-sniffer or use "-p [absolute project path]" option)
 ```
 
 ## Configuration
@@ -25,18 +25,6 @@ Collector and sniffer use 2 different configurations:
 
 - [collector](https://github.com/spryker-sdk/frontend-sniffer/blob/master/config/collector.js)
 - [sniffer](https://github.com/spryker-sdk/frontend-sniffer/blob/master/config/sniffer.js)
-
-Each configuration has a default filename:
-
-- collector: `frontend-sniffer.collector.config.js`
-- sniffer: `frontend-sniffer.config.js`
-
-You can override them by:
-
-- run `frontend-sniffer --config ./path/to/config/file.js`
-- run `frontend-sniffer --config ./path/to/config/folder`, where the folder contains a default configuration filename
-- place a configuaration with default filename in your target path
-- place a configuaration with default filename in your current path
 
 Each option will be evaluated by the tool, and if no configuration is found, the default one will be used.
 
@@ -51,13 +39,18 @@ frontend-sniffer -h
 Usage: frontend-sniffer [options]
 
 Options:
-  -v, --version          output the version number
-  -p, --path [path]      set the path for the collector to run (default: "/your/current/folder")
-  -c, --config [config]  load a specific configuration file (default: "")
-  -x, --exclude-sniffer  run only the collector, excluding the sniffer
-  -o, --only [n]         collect only the first [n] elements for each stream (default: null)
-  -d, --debug-mode       run in debug mode (verbose)
-  -h, --help             output usage information
+  -v, --version                     output the version number
+  -p, --path [path]                 set the path for the collector to run (default: "/your/current/folder")
+  -c, --config [config]             load a specific configuration file (default: "")
+  -x, --exclude-sniffer             run only the collector, excluding the sniffer
+  -o, --only [n]                    collect only the first [n] elements for each stream (default: null)
+  -d, --debug-mode                  run in debug mode (verbose)
+  -h, --help                        output usage information
+  -l, --level-restriction [level]   collect core or project level only (default: null)
+
+Example:
+Run sniffer for 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
+yarn sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
 ```
 
 ## Programmatic usage (API)
@@ -222,6 +215,6 @@ live. Some of them are in current development.
 - [x] Travis integration
 - [ ] Components previews
 - [ ] Styles previews
-- [ ] Project components collector
-- [ ] Project global application files collector
-- [ ] Project global styles collector
+- [x] Project components collector
+- [x] Project global application files collector
+- [x] Project global styles collector
