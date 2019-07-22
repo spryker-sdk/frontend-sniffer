@@ -202,6 +202,13 @@ module.exports = class extends Rule {
 }
 ```
 
+## Disable sniffer
+To disabling sniffer use comment field inside appropriate component file:
+```bash
+/* fe-sniffer:disabled all */ - disable all rules
+/* fe-sniffer:disabled name-of-the-rule */ - to disable appropriate rule (ex. /* fe-sniffer:disabled mandatory-z-index-variable correct-scss-component-structure */)
+```
+
 ## Development roadmap
 This is the current roadmap of feature that will be progressively enabled before v1 goes
 live. Some of them are in current development.
