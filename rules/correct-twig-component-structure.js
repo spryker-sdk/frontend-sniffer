@@ -39,6 +39,7 @@ module.exports = class extends Rule {
             };
             const isCommentsBeforeExtend = extendsIndex ? removeAllCommentsFromString(content, extendsIndex) : false;
             const selfExtensionRegExp = new RegExp(`["|'|\`]${name}["|'|\`]`);
+            const twigFileNameWithoutExtension = twigFileName.slice(0, twigFileName.lastIndexOf('.twig'));
             let configName;
             let isAtomicDesignEntityExtension = false;
             let isModelComponentExtension = false;
@@ -60,7 +61,7 @@ module.exports = class extends Rule {
                 isSelfExtension = selfExtensionRegExp.test(extendsString);
             }
 
-            if (name !== twigFileName.slice(0, twigFileName.lastIndexOf('.twig'))) {
+            if (name !== twigFileNameWithoutExtension) {
                 addError(formatMessage('There is wrong name of twig file in', type, name, path));
             }
 
