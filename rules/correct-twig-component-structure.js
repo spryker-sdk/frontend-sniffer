@@ -38,9 +38,11 @@ module.exports = class extends Rule {
                 return Boolean(contentWithoutComments.length);
             };
             const isCommentsBeforeExtend = extendsIndex ? removeAllCommentsFromString(content, extendsIndex) : false;
+            const selfExtensionRegExp = new RegExp(`["|'|\`]${name}["|'|\`]`);
             let configName;
             let isAtomicDesignEntityExtension = false;
             let isModelComponentExtension = false;
+            let isSelfExtension = false;
 
             if (configNameStringIndex) {
                 const { contract } = configDefinition;
@@ -55,13 +57,14 @@ module.exports = class extends Rule {
 
                 isAtomicDesignEntityExtension = /atom[' ']{0,}\(|molecule[' ']{0,}\(|organism[' ']{0,}\(/.test(extendsString);
                 isModelComponentExtension = /model[' ']{0,}\([' ']{0,}\'component/.test(extendsString);
+                isSelfExtension = selfExtensionRegExp.test(extendsString);
             }
 
             if (name !== twigFileName.slice(0, twigFileName.lastIndexOf('.twig'))) {
                 addError(formatMessage('There is wrong name of twig file in', type, name, path));
             }
 
-            if (!configDefinition) {
+            if (!configDefinition && isModelComponentExtension && !isSelfExtension) {
                 addError(formatMessage('There is no config block in twig file of', type, name, path));
             }
 
