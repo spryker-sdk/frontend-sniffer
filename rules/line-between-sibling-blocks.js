@@ -52,7 +52,8 @@ module.exports = class extends Rule {
             const { path, api } = twig;
             const { external } = api;
             const blockNames = (external && external.blocks) ? external.blocks : null;
-            const getValidationString = (closingTagData, nextBlockData) => twig.content.slice(closingTagData.index + closingTagData.data.length, nextBlockData.index);
+            const getValidationString = (closingTagData, nextBlockData) =>
+                twig.content.slice(closingTagData.index + closingTagData.data.length, nextBlockData.index);
 
             if (!blockNames) {
                 return;
@@ -68,10 +69,10 @@ module.exports = class extends Rule {
 
                 const stringBetweenBlocks = getValidationString(endOfTopBlock, nextBlock);
                 const countLineBreaks = 3;
-                const isSymbolRegExp = /[a-zA-Z0-9\'\"\>]/;
+                const symbolRegExp = /[a-zA-Z0-9\'\"\>]/;
                 const stringsArrayLength = stringBetweenBlocks.split('\n').length;
 
-                if (isSymbolRegExp.test(stringBetweenBlocks)) {
+                if (symbolRegExp.test(stringBetweenBlocks)) {
                     return;
                 }
 
