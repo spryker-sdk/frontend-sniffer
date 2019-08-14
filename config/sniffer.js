@@ -16,5 +16,5 @@ module.exports = {
         }
     },
 
-    enable: ['correct-twig-block-name']
+    enable: []
 };
