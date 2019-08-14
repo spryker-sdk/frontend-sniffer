@@ -18,7 +18,9 @@ module.exports = class extends Rule {
             }
 
             blocks.forEach(block => {
-                if (/^[a-zA-Z0-9]*$/.test(block.name)) {
+                const blockNameRegExp = /^[a-zA-Z0-9]*$/;
+
+                if (blockNameRegExp.test(block.name)) {
                     return;
                 }
 

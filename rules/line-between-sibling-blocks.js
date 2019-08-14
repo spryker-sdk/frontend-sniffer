@@ -15,22 +15,9 @@ module.exports = class extends Rule {
             const blockTags = content.match(blockRegExp);
             const includes = content.match(includingRegExp);
             const closingTags = content.match(closingTagRegExp);
-            let blockTagsData = blockTags;
-            let includesData = includes;
-            let closingTagsData = closingTags;
-
-
-            if (blockTags) {
-                blockTagsData = organizeData(content, blockTags);
-            }
-
-            if (includes) {
-                includesData = organizeData(content, includes);
-            }
-
-            if (closingTags) {
-                closingTagsData = organizeData(content, closingTags);
-            }
+            const blockTagsData = blockTags ? organizeData(content, blockTags) : null;
+            const includesData = includes ? organizeData(content, includes) : null;
+            const closingTagsData = closingTags ? organizeData(content, closingTags) : null;
 
             return {
                 blockTagsData: blockTagsData,
@@ -45,8 +32,7 @@ module.exports = class extends Rule {
             return startIndex + index;
         };
 
-        const organizeData = (content, tags) => {
-            return tags.map((tag, index, arr) => {
+        const organizeData = (content, tags) => tags.map((tag, index, arr) => {
                 const entryIndex = findEntryIndex(currentIndex, content, tag);
                 currentIndex = entryIndex + tag.length;
 
@@ -58,8 +44,7 @@ module.exports = class extends Rule {
                     data: tag,
                     index: entryIndex,
                 }
-            })
-        };
+            });
 
         this.filterModulesData(data, 'twig').forEach(twigFileData => {
             const { files, type, name } = twigFileData;
@@ -67,43 +52,37 @@ module.exports = class extends Rule {
             const { path, api } = twig;
             const { external } = api;
             const blockNames = (external && external.blocks) ? external.blocks : null;
-            const getValidationString = (closingTagData, nextBlockData) => {
-                return files.twig.content.slice(closingTagData.index + closingTagData.data.length, nextBlockData.index);
-            };
+            const getValidationString = (closingTagData, nextBlockData) => twig.content.slice(closingTagData.index + closingTagData.data.length, nextBlockData.index);
 
             if (!blockNames) {
                 return;
             }
 
-            const structureData = contentParser(files.twig.content);
-            const {blockTagsData, includesData, closingTagsData} = structureData;
-            const getClosestElement = (previousBlock) => {
-                return item => item.index > previousBlock.index;
-            };
+            const structureData = contentParser(twig.content);
+            const { blockTagsData, includesData, closingTagsData } = structureData;
+            const getClosestElement = previousBlock => item => item.index > previousBlock.index;
             const checkSymbolsBetweenBlocks = (endOfTopBlock, nextBlock) => {
                 if (!nextBlock) {
                     return;
                 }
 
-                const betweenBlocksString = getValidationString(endOfTopBlock, nextBlock);
+                const stringBetweenBlocks = getValidationString(endOfTopBlock, nextBlock);
                 const countLineBreaks = 3;
+                const isSymbolRegExp = /[a-zA-Z0-9\'\"\>]/;
+                const stringsArrayLength = stringBetweenBlocks.split('\n').length;
 
-                if (/[a-zA-Z0-9\'\"\>]/.test(betweenBlocksString)) {
+                if (isSymbolRegExp.test(stringBetweenBlocks)) {
                     return;
                 }
 
-                if (betweenBlocksString.split('\n').length < countLineBreaks) {
+                if (stringsArrayLength < countLineBreaks) {
                     addError(formatMessage(`Please add empty line before ${nextBlock.data}`, type, name, path));
                 }
 
-                if (betweenBlocksString.split('\n').length > countLineBreaks) {
+                if (stringsArrayLength > countLineBreaks) {
                     addError(formatMessage(`Please remove unnecessary empty lines before ${nextBlock.data}`, type, name, path));
                 }
             };
-
-            if (!closingTagsData && !includesData) {
-                return;
-            }
 
             if (closingTagsData) {
                 closingTagsData.forEach(closingTagData => {
