@@ -88,7 +88,7 @@ const createScanConfig = (dirs, cwdPattern) => ({
 });
 
 exports.core = {
-    scan: createScanConfig(['./'], '**/vendor/**/spryker-shop/**/')
+    scan: createScanConfig(['./'], '**/spryker/spryker-shop/**/')
 };
 
 exports.project = {
