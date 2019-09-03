@@ -1,4 +1,3 @@
-const { dim, bold } = require('colors');
 const { Rule } = require('../api');
 
 module.exports = class extends Rule {
@@ -7,12 +6,16 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
-            if (component.files.readme.exists) {
+        const { formatMessage, addError } = this.outcome;
+
+        this.parseOutputFieldHelper(data.modules).forEach(component => {
+            const { files, type, name, path } = component;
+
+            if (!files.readme || files.readme.exists) {
                 return;
             }
 
-            this.outcome.addError(`README.md missing in ${component.type} ${bold(component.name)}:\n${dim(component.path)}`);
+            addError(formatMessage('README.md missing', type, name, path));
         });
     }
 }

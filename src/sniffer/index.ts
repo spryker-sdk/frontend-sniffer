@@ -7,7 +7,7 @@ import { scan } from '../scanner';
 import { TestOutcome } from './test-outcome';
 import { performEvaluation, IEvaluation } from './evaluator';
 import { Observable, from } from 'rxjs';
-import { info, createDebugger, warn } from '../logger';
+import { info, createDebugger } from '../logger';
 
 const debugRule = createDebugger<Rule>('Loading rule', 'name');
 

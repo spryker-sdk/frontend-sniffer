@@ -1,6 +1,7 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import { IParserLog, IParserOutput, TParser } from './base';
+import { snifferDisabledRules } from './common';
 
 export interface ITag {
     name: string
@@ -28,21 +29,51 @@ export interface IMethod extends IFunction {
 }
 
 export interface IClass {
-    name: string,
-    description: string
-    tags: ITag[]
-    properties: any
+    name: string
+    description?: string
+    tags?: ITag[]
+    properties: IProperty[]
     methods: IMethod[]
-    accessors: any
+    accessors: IAccessor[]
 }
 
-export interface ITypescriptApi {
+export interface IProperty {
+    name: string
+    description: string
+    returnType: string
+    visibility: string
+    isReadonly: boolean
+}
+
+export interface IAccessor {
+    name: string
+    description: string
+    returnType: string
+    parameters: IParameter[]
+    accessorType: string
+    visibility: string
+}
+
+export type TDeclarationVariants = ts.MethodDeclaration | ts.FunctionDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration
+
+export interface ITypescriptExternalApi {
     classes: IClass[]
     functions: IFunction[]
 }
 
+export interface ITypescriptInternalApi {
+    classes: IClass[]
+}
+
 export const VisibilityMap = {
-    [ts.SyntaxKind.PublicKeyword]: 'public'
+    [ts.SyntaxKind.PublicKeyword]: 'public',
+    [ts.SyntaxKind.ProtectedKeyword]: 'protected',
+    [ts.SyntaxKind.PrivateKeyword]: 'private'
+}
+
+export const AccessorsMap = {
+    [ts.SyntaxKind.GetAccessor]: 'get',
+    [ts.SyntaxKind.SetAccessor]: 'set'
 }
 
 export const BaseTypeMap = {
@@ -59,10 +90,15 @@ const is = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind === ki
 const isNot = (kind: ts.SyntaxKind) => (node: ts.Node): boolean => node.kind !== kind;
 const merge = (a: any, b: any): any => [...a, ...b];
 const isVisibility = (node: ts.Modifier): boolean => !!VisibilityMap[node.kind];
+const isReadonly = (node: ts.PropertyDeclaration): boolean => !!node.modifiers &&
+    !!node.modifiers.filter(node => node.kind === ts.SyntaxKind.ReadonlyKeyword).length;
 const isBaseType = (node: ts.TypeNode): boolean => !!BaseTypeMap[node.kind];
 const isParameterOptional = (node: ts.ParameterDeclaration) => !!node.questionToken;
 const hasParameterComment = (node: ts.ParameterDeclaration) =>
     (tag: ts.JSDocParameterTag): boolean => node.name.getText() === tag.name.getText();
+const mergeAccessors = (node: ts.ClassDeclaration, isInternal: boolean): IAccessor[] =>
+    merge(crawlForGetAccessors(isInternal)(node), crawlForSetAccessors(isInternal)(node));
+const hasPublicVisibility = (node: TDeclarationVariants) => VisibilityMap[ts.SyntaxKind.PublicKeyword] === extractVisibility(node);
 
 const typescriptCompilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2015
@@ -120,10 +156,9 @@ function createTypeString(node: ts.TypeNode, extractAsync: boolean = false): str
     if (is(ts.SyntaxKind.ArrayType)(node)) {
         const arrayTypeNode = <ts.ArrayTypeNode>node;
 
-        if (isBaseType(arrayTypeNode)) {
-            BaseTypeMap[arrayTypeNode.elementType.kind] + '[]';
+        if (isBaseType(arrayTypeNode.elementType)) {
+            return BaseTypeMap[arrayTypeNode.elementType.kind] + '[]';
         }
-
         const typeReferenceNode = <ts.TypeReferenceNode>arrayTypeNode.elementType;
         return typeReferenceNode.typeName.getText() + '[]';
     }
@@ -165,21 +200,76 @@ function createFunction(node: ts.MethodDeclaration | ts.FunctionDeclaration): IF
     }
 }
 
-function createMethod(node: ts.MethodDeclaration): IMethod {
-    return {
-        ...createFunction(node),
-        visibility: extractVisibility(node)
+function createMethod(isInternal = false) {
+    return function (node: ts.MethodDeclaration): IMethod {
+        const isMethodInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isMethodInScope) {
+            return {
+                ...createFunction(node),
+                visibility: extractVisibility(node)
+            };
+        }
+
+        return;
     }
 }
 
-function createClass(node: ts.ClassDeclaration): IClass {
-    return {
-        name: node.name ? node.name.getText() : '',
-        description: extractDescription(node),
-        tags: extractTags(node),
-        properties: null,
-        methods: crawlForMethods(node),
-        accessors: null
+function createClass(isInternal = false) {
+    return function(node: ts.ClassDeclaration): IClass {
+        const commonClassOutput = {
+            name: node.name ? node.name.getText() : '',
+            properties: crawlForProperty(isInternal)(node),
+            methods: crawlForMethods(isInternal)(node),
+            accessors: mergeAccessors(node, isInternal)
+        };
+
+        if (isInternal) {
+            return commonClassOutput;
+        }
+
+        return {
+            ...commonClassOutput,
+            description: extractDescription(node),
+            tags: extractTags(node)
+        }
+    }
+}
+
+function createAccessors(isInternal = false) {
+    return function(node: ts.AccessorDeclaration): IAccessor {
+        const isAccessorInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isAccessorInScope) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                parameters: extractParameters(node),
+                returnType: extractReturnValue(node),
+                accessorType: AccessorsMap[node.kind],
+                visibility: extractVisibility(node)
+            }
+        }
+
+        return;
+    }
+}
+
+function createProperty(isInternal = false) {
+    return function (node: ts.PropertyDeclaration): IProperty {
+        const isPropertyInScope = isInternal !== hasPublicVisibility(node);
+
+        if (isPropertyInScope) {
+            return {
+                name: node.name ? node.name.getText() : '',
+                description: extractDescription(node),
+                returnType: extractReturnValue(node),
+                visibility: extractVisibility(node),
+                isReadonly: isReadonly(node)
+            };
+        }
+
+        return;
     }
 }
 
@@ -199,7 +289,8 @@ function createCrawler<O, I extends ts.Node = ts.Node>(
 
         return children
             .map(crawler)
-            .reduce(merge, results);
+            .reduce(merge, results)
+            .filter(item => Boolean(item));
     }
 }
 
@@ -208,17 +299,32 @@ const crawlForFunctions = createCrawler<IFunction, ts.SourceFile>(
     createFunction
 );
 
-const crawlForMethods = createCrawler<IMethod, ts.ClassDeclaration>(
+const crawlForMethods = (isInternal: boolean) => createCrawler<IMethod, ts.ClassDeclaration>(
     ts.SyntaxKind.MethodDeclaration,
-    createMethod
+    createMethod(isInternal)
 );
 
-const crawlForClasses = createCrawler<IClass, ts.SourceFile>(
+const crawlForClasses = (isInternal = false) => createCrawler<IClass, ts.SourceFile>(
     ts.SyntaxKind.ClassDeclaration,
-    createClass
+    createClass(isInternal)
 );
 
-function extractVisibility(node: ts.MethodDeclaration): string {
+const crawlForProperty = (isInternal: boolean) => createCrawler<IProperty, ts.ClassDeclaration>(
+    ts.SyntaxKind.PropertyDeclaration,
+    createProperty(isInternal)
+);
+
+const crawlForGetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
+    ts.SyntaxKind.GetAccessor,
+    createAccessors(isInternal)
+);
+
+const crawlForSetAccessors = (isInternal: boolean) => createCrawler<IAccessor, ts.ClassDeclaration>(
+    ts.SyntaxKind.SetAccessor,
+    createAccessors(isInternal)
+);
+
+function extractVisibility(node: TDeclarationVariants): string {
     if (!node.modifiers) {
         return VisibilityMap[ts.SyntaxKind.PublicKeyword];
     }
@@ -234,11 +340,11 @@ function extractVisibility(node: ts.MethodDeclaration): string {
     return VisibilityMap[visibility.kind];
 }
 
-function extractReturnValue(node: ts.MethodDeclaration | ts.FunctionDeclaration): string {
+function extractReturnValue(node: TDeclarationVariants): string {
     return createTypeString(node.type, extractAsync(node));
 }
 
-function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): boolean {
+function extractAsync(node: TDeclarationVariants): boolean {
     if (!node.modifiers) {
         return false;
     }
@@ -248,7 +354,7 @@ function extractAsync(node: ts.MethodDeclaration | ts.FunctionDeclaration): bool
         .find(is(ts.SyntaxKind.AsyncKeyword));
 }
 
-function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration): IParameter[] {
+function extractParameters(node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.AccessorDeclaration): IParameter[] {
     const parameterTags = <ts.JSDocParameterTag[]>ts
         .getAllJSDocTagsOfKind(node, ts.SyntaxKind.JSDocParameterTag);
 
@@ -278,7 +384,7 @@ function extractDescription(node: ts.Node): string {
     return commentNode.comment || null;
 }
 
-export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IParserOutput<ITypescriptApi>> => {
+export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = async (file: string): Promise<IParserOutput<ITypescriptExternalApi, ITypescriptInternalApi>> => {
     if (!file) {
         return null;
     }
@@ -290,6 +396,7 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
 
         if (!sourceFile) {
             return {
+                disabledSnifferRules: null,
                 content: null,
                 api: {
                     external: null,
@@ -306,18 +413,22 @@ export const parse: TParser<ITypescriptApi> = async (file: string): Promise<IPar
         }
 
         return {
+            disabledSnifferRules: snifferDisabledRules(sourceFile.text),
             content: null,
             api: {
                 external: {
-                    classes: crawlForClasses(sourceFile),
+                    classes: crawlForClasses()(sourceFile),
                     functions: crawlForFunctions(sourceFile)
                 },
-                internal: null
+                internal: {
+                    classes: crawlForClasses(true)(sourceFile)
+                }
             },
             log
         }
     } catch (error) {
         return {
+            disabledSnifferRules: null,
             content: null,
             api: {
                 external: null,

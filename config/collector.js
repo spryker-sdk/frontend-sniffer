@@ -7,7 +7,7 @@ const excludedPatterns = [
     '!test'
 ]
 
-const createScanConfig = (dirs) => ({
+const createScanConfig = (dirs, cwdPattern) => ({
     application: {
         dirs,
         patterns: [
@@ -25,10 +25,10 @@ const createScanConfig = (dirs) => ({
     styles: {
         dirs,
         patterns: [
-            '**/Theme/default/styles/settings/*',
-            '**/Theme/default/styles/helpers/*',
-            '**/Theme/default/styles/basics/*',
-            '**/Theme/default/styles/utils/*',
+            `${cwdPattern}Theme/default/styles/settings/*`,
+            `${cwdPattern}Theme/default/styles/helpers/*`,
+            `${cwdPattern}Theme/default/styles/basics/*`,
+            `${cwdPattern}Theme/default/styles/utils/*`,
             '!shared.scss',
             '!basic.scss',
             '!util.scss',
@@ -45,9 +45,37 @@ const createScanConfig = (dirs) => ({
     components: {
         dirs,
         patterns: [
-            '**/Theme/default/components/atoms/*',
-            '**/Theme/default/components/molecules/*',
-            '**/Theme/default/components/organisms/*',
+            `${cwdPattern}Theme/default/components/atoms/*`,
+            `${cwdPattern}Theme/default/components/molecules/*`,
+            `${cwdPattern}Theme/default/components/organisms/*`,
+            ...excludedPatterns
+        ],
+        options: {
+            followSymlinkedDirectories: false,
+            absolute: true,
+            onlyFiles: false,
+            onlyDirectories: true
+        }
+    },
+
+    templates: {
+        dirs,
+        patterns: [
+            `${cwdPattern}Theme/default/templates/*`,
+            ...excludedPatterns
+        ],
+        options: {
+            followSymlinkedDirectories: false,
+            absolute: true,
+            onlyFiles: false,
+            onlyDirectories: true
+        }
+    },
+
+    views: {
+        dirs,
+        patterns: [
+            `${cwdPattern}Theme/default/views/*`,
             ...excludedPatterns
         ],
         options: {
@@ -57,12 +85,12 @@ const createScanConfig = (dirs) => ({
             onlyDirectories: true
         }
     }
-})
+});
 
 exports.core = {
-    scan: createScanConfig(['./'])
-}
+    scan: createScanConfig(['./'], '**/vendor/**/spryker-shop/**/')
+};
 
 exports.project = {
-    scan: createScanConfig(['./'])
-}
+    scan: createScanConfig(['./'], '**/src/Pyz/Yves/**/')
+};

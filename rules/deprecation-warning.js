@@ -6,7 +6,7 @@ module.exports = class extends Rule {
     }
 
     test(data) {
-        data.components.forEach(component => {
+        this.parseOutputFieldHelper(data.modules).forEach(component => {
             if (component.isDeprecated) {
                 this.outcome.addWarning(`${component.name} is deprecated`);
             }

@@ -1,31 +1,48 @@
-import { combineLatest } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { getObservable as getApplicationObservable } from './application';
-import { getObservable as getStylesObservable } from './styles';
-import { getObservable as getComponentsObservable } from './components';
+import { getObservable as getStylesObservable, IStyleFilesResult } from './styles';
+import { getObservable as getComponentsObservable, IParsedComponentResult } from './components';
+import { getObservable as getTemplatesObservable, IParsedTemplatesResult } from './templates';
+import { getObservable as getViewsObservable, IParsedViewsResult } from './views';
 import { IApplicationFile } from './application/parser';
 import { IStyleFile } from './styles/parser';
-import { IParsedComponent } from './components/parser';
+import { getModuleWrapper, IParsedModules } from './wrappers';
 import { info } from '../logger';
-import { config } from './config';
 
-export type TCollectorObservableOutput = [IApplicationFile[], IStyleFile[], IParsedComponent[]];
+export type TCollectorObservableOutput = {
+    applicationFiles: IApplicationFile[]
+    styleFiles: IStyleFilesResult
+    components: IParsedComponentResult
+    templates: IParsedTemplatesResult
+    views: IParsedViewsResult
+};
 
 export interface ICollectorOutput {
     applicationFiles: IApplicationFile[]
-    styleFiles: IStyleFile[]
-    components: IParsedComponent[]
+    styleFiles: {
+        project?: IStyleFile[]
+        core?: IStyleFile[]
+    }
+    modules: IParsedModules
 }
 
-export const collect = (): Promise<ICollectorOutput> => new Promise<ICollectorOutput>((resolve, reject) => {
+export const collect = (): Promise<ICollectorOutput> => new Promise<any>((resolve, reject) => {
     info.print('\nRunning collector...');
 
-    return combineLatest(
-        getApplicationObservable(),
-        getStylesObservable(),
-        getComponentsObservable()
-    ).subscribe((observableOutput: TCollectorObservableOutput) => resolve({
-        applicationFiles: observableOutput[0],
-        styleFiles: observableOutput[1],
-        components: observableOutput[2]
-    }))
-})
+    return forkJoin({
+        applicationFiles: getApplicationObservable(),
+        styleFiles: getStylesObservable(),
+        components: getComponentsObservable(),
+        templates: getTemplatesObservable(),
+        views: getViewsObservable(),
+    }).subscribe((observableOutput: TCollectorObservableOutput) => {
+        const { components, templates, views } = observableOutput;
+        const modules: IParsedModules = getModuleWrapper(components, templates, views);
+
+        return resolve({
+            applicationFiles: observableOutput.applicationFiles,
+            styleFiles: observableOutput.styleFiles,
+            modules
+        });
+    })
+});

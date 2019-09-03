@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { IParserOutput, TParser } from './base';
+import { snifferDisabledRules } from './common';
 
 export interface ICommentTag {
     name: string
@@ -44,15 +45,15 @@ const allowedDefinitions = [
     'attributes'
 ];
 
-const contentRegex = /(\{|\}|\.|\n|\w|:|\s|t|,|\[|\]|\||\(|\)|(('|"|\{#).*('|"|#\}))|)+/;
+const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|\?|(('|"|\{#).*('|"|#\}))|)+/;
 const defineNameRegex = new RegExp(`(?<=\\{%\\s+define\\s+)(${allowedDefinitions.join('|')})`, 'i');
 const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinitions.join('|')})\\s+=\\s+\\{`);
 const defineClosingTagRegex = /\}\s*%\}/;
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
 
-const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*block.+%\}/gmi;
-const blockNameRegex = /(?<=\{%\s*block\s+)\w+(?=\s*%\})/gmi;
+const blockAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%(\s|-)*block.+%\}/gmi;
+const blockNameRegex = /(?<=\{%(\s|-)*block\s+)\w+(?=(\s|-)*%\})/gmi;
 const macroAndCommentRegex = /(\{#[^#]+#\}\n?)?\{%\s*macro.+%\}/gmi;
 const macroSignatureRegex = /(?<=\{%\s*macro\s+)(\w|\(|\)|\s|,)+(?=\s*%\})/gmi;
 const commentRegex = /(?<=\{#)(.|\n)+(?=#\})/gmi;
@@ -215,6 +216,7 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
         const cleanedContent = removeTagsWithChildrenBlocks(content);
 
         return {
+            disabledSnifferRules: snifferDisabledRules(content),
             content,
             api: {
                 external: {
@@ -227,6 +229,7 @@ export const parse: TParser<ITwigApi> = async (file: string): Promise<IParserOut
         }
     } catch (error) {
         return {
+            disabledSnifferRules: null,
             content: null,
             api: {
                 external: null,

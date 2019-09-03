@@ -8,4 +8,4 @@ module.exports = {
     collect,
     sniff,
     Rule
-}
+};
