@@ -13,6 +13,11 @@ module.exports = class extends Rule {
             const {twig} = files;
             const {path, api} = twig;
             const stringsBetweenBrackets = [];
+            const betweenBlocksReg = /^\}[\s]{0,}\{$/i;
+            let dataArray = [];
+            const clearArrayFromBlocksData = stringsArray => stringsArray.filter(
+                string => !string.includes('{%') && !betweenBlocksReg.test(string));
+
             const findStringBetweenBrackets = (string, stringsBetweenBrackets) => {
                 const reg = /(\[|\]|\{|\})[a-zA-Z0-9 _\=\.\"\%\':\-\~\,\(\)\?\n\r]{1,}(\[|\]|\{|\})/i;
                 const result = string.match(reg);
@@ -36,8 +41,9 @@ module.exports = class extends Rule {
             };
 
             findStringBetweenBrackets(twig.content, stringsBetweenBrackets);
+            dataArray = clearArrayFromBlocksData(stringsBetweenBrackets);
             console.log(path);
-            console.log(stringsBetweenBrackets);
+            console.log(dataArray);
         })
     }
 };
