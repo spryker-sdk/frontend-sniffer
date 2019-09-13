@@ -11,36 +11,41 @@ module.exports = class extends Rule {
         this.filterModulesData(data, 'twig').forEach(twigFileData => {
             const {files, type, name} = twigFileData;
             const {twig} = files;
-            const {content} = twig;
-            const {path, api} = twig;
-            const stringsBetweenBrackets = [];
+            const {content, path} = twig;
             const betweenBlocksReg = /^\}[\s]{0,}\{$/i;
             const twigVariableReg = /\{\{[a-zA-Z0-9 _\=\.\"\%\':\/\_\-\~\,\(\)\?\|\[\]\n\r]{1,}\}\}/gi;
             const twigVariables = content.match(twigVariableReg);
             const clearArrayFromBlocksData = stringsArray => stringsArray.filter(
                 string => !string.includes('{%') && !string.includes('%}') && !betweenBlocksReg.test(string));
 
-            const findStringBetweenBrackets = (string, stringsBetweenBrackets) => {
-                const reg = /(\[|\]|\{|\})[a-zA-Z0-9 _\=\.\"\%\':\-\~\,\(\)\?\n\r]{1,}(\[|\]|\{|\})/i;
-                const result = string.match(reg);
+            const createStringsBetweenBracketsArray = string => {
+                const stringsBetweenBrackets = [];
+                const findStringBetweenBrackets = (string, stringsBetweenBrackets) => {
+                    const reg = /(\[|\]|\{|\})[a-zA-Z0-9 _\=\.\"\%\':\|\-\~\,\(\)\?\n\r]{1,}(\[|\]|\{|\})/i;
+                    const result = string.match(reg);
 
-                if (!Array.isArray(result)) {
-                    return;
-                }
+                    if (!Array.isArray(result)) {
+                        return;
+                    }
 
-                const stringBetweenBrackets = result[0];
-                const symbolsCount = stringBetweenBrackets.length;
-                const index = string.indexOf(stringBetweenBrackets);
-                const stringAfterBracketsPair = string.slice(index + symbolsCount - 1);
+                    const stringBetweenBrackets = result[0];
+                    const symbolsCount = stringBetweenBrackets.length;
+                    const index = string.indexOf(stringBetweenBrackets);
+                    const stringAfterBracketsPair = string.slice(index + symbolsCount - 1);
 
-                stringsBetweenBrackets.push(stringBetweenBrackets);
+                    stringsBetweenBrackets.push(stringBetweenBrackets);
 
-                if (!stringAfterBracketsPair) {
-                    return;
+                    if (!stringAfterBracketsPair) {
+                        return;
+                    };
+
+                    findStringBetweenBrackets(stringAfterBracketsPair, stringsBetweenBrackets);
                 };
 
-                findStringBetweenBrackets(stringAfterBracketsPair, stringsBetweenBrackets);
-            };
+                findStringBetweenBrackets(string, stringsBetweenBrackets);
+
+                return stringsBetweenBrackets;
+            }
 
             const changeTwigVariablesToUnicode = (content, variables) => {
                 let modifiedContent = content;
@@ -65,10 +70,10 @@ module.exports = class extends Rule {
                 data.forEach( str => {
                     partOfStringObject = partOfStringObject ? partOfStringObject + str.slice(1) : str;
 
-                    const openingCurlyBrackets = str.match(/\{/g);
-                    const openingSquareBrackets = str.match(/\[/g);
-                    const closingCurlyBrackets = str.match(/\}/g);
-                    const closingSquareBrackets = str.match(/\]/g);
+                    const openingCurlyBrackets = partOfStringObject.match(/\{/g);
+                    const openingSquareBrackets = partOfStringObject.match(/\[/g);
+                    const closingCurlyBrackets = partOfStringObject.match(/\}/g);
+                    const closingSquareBrackets = partOfStringObject.match(/\]/g);
                     const countOfOpeningCurlyBracket = openingCurlyBrackets ? openingCurlyBrackets.length : 0;
                     const countOfOpeningSquareBracket = openingSquareBrackets ? openingSquareBrackets.length : 0;
                     const countOfClosingCurlyBracket = closingCurlyBrackets ? closingCurlyBrackets.length : 0;
@@ -86,16 +91,27 @@ module.exports = class extends Rule {
                 return firstLevelObjects;
             };
 
+            const checkCommaAfterLastObjectsParameter = objectStrings => {
+                const commaAfterLastParameterReg = /[a-zA-Z0-9\]\}]{1}[' ']{0,}[\r]{0,1}[' ']{0,}[\n]{1,}[' ']{0,}[\]|\}]{1,}/g;
+
+                objectStrings.forEach(objectString => {
+                    if (!commaAfterLastParameterReg.test(objectString)) {
+                        return;
+                    }
+
+                    objectString = objectString.replace(/&#123;/g, '{');
+                    objectString = objectString.replace(/&#125;/g, '}');
+
+                    addError(formatMessage(`Please add comma after each last object value or method in ${objectString}`, type, name, path));
+                })
+            };
+
             const modifiedContent = changeTwigVariablesToUnicode(content, twigVariables);
-
-            findStringBetweenBrackets(modifiedContent, stringsBetweenBrackets);
-
+            const stringsBetweenBrackets = createStringsBetweenBracketsArray(modifiedContent);
             const dataArray = clearArrayFromBlocksData(stringsBetweenBrackets);
             const firstLevelObjects = createFirstLevelObjectData(dataArray);
 
-            console.log(path);
-            console.log(firstLevelObjects);
-
+            checkCommaAfterLastObjectsParameter(firstLevelObjects);
         })
     }
 };
