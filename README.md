@@ -54,8 +54,8 @@ yarn sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
 ```
 
 ## Programmatic usage (API)
-With the sniffer installed a local dependency in your project, you can use
-the public API to inteact with the sniffer. You can access them:
+With the sniffer installed as local dependency in your project, you can use
+the public API to interact with the sniffer. You can access them:
 
 ```ts
 // commonjs
@@ -140,7 +140,7 @@ collect()
 ```
 
 #### API: `sniff`
-Use function `sniff` to run the sniffer on the collected information. The function is `async` and will return a promis of the following object:
+Use function `sniff` to run the sniffer on the collected information. The function is `async` and will return a promise of the following object:
 
 ```ts
 export interface IEvaluation {
@@ -208,20 +208,3 @@ To disabling sniffer use comment field inside appropriate component file:
 /* fe-sniffer:disabled all */ - disable all rules
 /* fe-sniffer:disabled name-of-the-rule */ - disable appropriate rule (ex. /* fe-sniffer:disabled mandatory-z-index-variable correct-scss-component-structure */)
 ```
-
-## Development roadmap
-This is the current roadmap of feature that will be progressively enabled before v1 goes
-live. Some of them are in current development.
-
-- [x] Core components collector
-- [x] Core global application files collector
-- [x] Core global styles collector
-- [x] Sniffer engine
-- [x] Sniffer rules implementation
-- [ ] Sniffer full ruleset
-- [x] Travis integration
-- [ ] Components previews
-- [ ] Styles previews
-- [x] Project components collector
-- [x] Project global application files collector
-- [x] Project global styles collector
