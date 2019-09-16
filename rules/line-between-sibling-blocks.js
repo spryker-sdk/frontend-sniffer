@@ -17,12 +17,12 @@ module.exports = class extends Rule {
             const closingTags = content.match(closingTagRegExp);
             const blockTagsData = blockTags ? organizeData(content, blockTags) : null;
             const includesData = includes ? organizeData(content, includes) : null;
-            const closingTagsData = closingTags ? organizeData(content, closingTags) : null;
+            const closingTagsList = closingTags ? organizeData(content, closingTags) : null;
 
             return {
-                blockTagsData: blockTagsData,
-                includesData: includesData,
-                closingTagsData: closingTagsData,
+                blockTagsData,
+                includesData,
+                closingTagsList,
             }
         };
 
@@ -60,7 +60,7 @@ module.exports = class extends Rule {
             }
 
             const structureData = contentParser(twig.content);
-            const { blockTagsData, includesData, closingTagsData } = structureData;
+            const { blockTagsData, includesData, closingTagsList } = structureData;
             const getClosestElement = previousBlock => item => item.index > previousBlock.index;
             const checkSymbolsBetweenBlocks = (endOfTopBlock, nextBlock) => {
                 if (!nextBlock) {
@@ -85,8 +85,8 @@ module.exports = class extends Rule {
                 }
             };
 
-            if (closingTagsData) {
-                closingTagsData.forEach(closingTagData => {
+            if (closingTagsList) {
+                closingTagsList.forEach(closingTagData => {
                     const closestBlock = blockTagsData.find(getClosestElement(closingTagData));
                     const closestInclude = includesData ? includesData.find(getClosestElement(closingTagData)) : null;
 
