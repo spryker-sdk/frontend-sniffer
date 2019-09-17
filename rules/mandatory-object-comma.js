@@ -63,6 +63,7 @@ module.exports = class extends Rule {
 
             const createFirstLevelObjectData = data => {
                 const firstLevelObjects = [];
+                const countSubstringOccurances = substrings => substrings ? substrings.length : 0;
                 let partOfStringObject = '';
 
                 data.forEach( str => {
@@ -72,13 +73,13 @@ module.exports = class extends Rule {
                     const openingSquareBrackets = partOfStringObject.match(/\[/g);
                     const closingCurlyBrackets = partOfStringObject.match(/\}/g);
                     const closingSquareBrackets = partOfStringObject.match(/\]/g);
-                    const countOfOpeningCurlyBracket = openingCurlyBrackets ? openingCurlyBrackets.length : 0;
-                    const countOfOpeningSquareBracket = openingSquareBrackets ? openingSquareBrackets.length : 0;
-                    const countOfClosingCurlyBracket = closingCurlyBrackets ? closingCurlyBrackets.length : 0;
-                    const countOfClosingSquareBracket = closingSquareBrackets ? closingSquareBrackets.length : 0;
+                    const openingCurlyBracketLength = countSubstringOccurances(openingCurlyBrackets);
+                    const openingSquareBracketLength = countSubstringOccurances(openingSquareBrackets);
+                    const closingCurlyBracketLength = countSubstringOccurances(closingCurlyBrackets);
+                    const closingSquareBracketLength = countSubstringOccurances(closingSquareBrackets);
 
-                    if (countOfOpeningCurlyBracket !== countOfClosingCurlyBracket ||
-                        countOfOpeningSquareBracket !==  countOfClosingSquareBracket) {
+                    if (openingCurlyBracketLength !== closingCurlyBracketLength ||
+                        openingSquareBracketLength !== closingSquareBracketLength) {
                         return;
                     }
 
