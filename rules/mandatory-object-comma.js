@@ -63,7 +63,7 @@ module.exports = class extends Rule {
 
             const createFirstLevelObjectData = data => {
                 const firstLevelObjects = [];
-                const countSubstringOccurances = substrings => substrings ? substrings.length : 0;
+                const getLength = substrings => substrings ? substrings.length : 0;
                 let partOfStringObject = '';
 
                 data.forEach( str => {
@@ -73,10 +73,10 @@ module.exports = class extends Rule {
                     const openingSquareBrackets = partOfStringObject.match(/\[/g);
                     const closingCurlyBrackets = partOfStringObject.match(/\}/g);
                     const closingSquareBrackets = partOfStringObject.match(/\]/g);
-                    const openingCurlyBracketLength = countSubstringOccurances(openingCurlyBrackets);
-                    const openingSquareBracketLength = countSubstringOccurances(openingSquareBrackets);
-                    const closingCurlyBracketLength = countSubstringOccurances(closingCurlyBrackets);
-                    const closingSquareBracketLength = countSubstringOccurances(closingSquareBrackets);
+                    const openingCurlyBracketLength = getLength(openingCurlyBrackets);
+                    const openingSquareBracketLength = getLength(openingSquareBrackets);
+                    const closingCurlyBracketLength = getLength(closingCurlyBrackets);
+                    const closingSquareBracketLength = getLength(closingSquareBrackets);
 
                     if (openingCurlyBracketLength !== closingCurlyBracketLength ||
                         openingSquareBracketLength !== closingSquareBracketLength) {
