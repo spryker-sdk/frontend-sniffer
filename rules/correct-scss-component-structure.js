@@ -34,8 +34,8 @@ module.exports = class extends Rule {
                     addError(formatMessage('There is wrong name of mixin in scss file of', type, name, path));
                 }
 
-                if (!hasContent) {
-                    addError(formatMessage(`There is no ${contentRule} in mixin of`, type, name, path));
+                if (!hasContent && !index) {
+                    addError(formatMessage(`There is no ${contentRule} in the first mixin of`, type, name, path));
                 }
 
                 if (hasContent && contentRuleIndex !== convertedMixinText.lastIndexOf(contentRule)) {
