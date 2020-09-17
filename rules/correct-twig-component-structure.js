@@ -33,7 +33,7 @@ module.exports = class extends Rule {
             const extendsIndex = extendStrings && content.indexOf(extendStrings[0]);
             const removeAllCommentsFromString = (content, extendsIndex) => {
                 const contentBeforeExtend = content.substring(0, extendsIndex);
-                const contentWithoutComments = contentBeforeExtend.replace(/\{*. [^#]* \#\}(\r?\n|\r)/g, '');
+                const contentWithoutComments = contentBeforeExtend.replace(/\{*. [^#]* \#\}(\r?\n|\r)(\r?\n|\r)?/g, '');
 
                 return Boolean(contentWithoutComments.length);
             };
