@@ -45,10 +45,10 @@ const allowedDefinitions = [
     'attributes'
 ];
 
-const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|\?|(('|"|\{#).*('|"|#\}))|)+/;
 const defineNameRegex = new RegExp(`(?<=\\{%\\s+define\\s+)(${allowedDefinitions.join('|')})`, 'i');
 const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinitions.join('|')})\\s+=\\s+\\{`);
 const defineClosingTagRegex = /\}\s*%\}/;
+const contentRegex =  new RegExp(`\\n?(.\\n?(?!${defineClosingTagRegex.source}))+(\\n|\\s)?`);
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
 
@@ -135,11 +135,13 @@ function matchAll(input: string, regex: RegExp): RegExpExecArray[] {
 
 function extractDefinitions(content: string): IDefinition[] {
     const declarations = content.match(defineDeclarationRegex) || [];
-    return declarations.map((declaration: string) => ({
+    return declarations.map((declaration: string) => {
+        // console.log(declaration.match(defineContractRegex)[0]);
+        return {
         name: declaration.match(defineNameRegex)[0],
         contract: declaration.match(defineContractRegex)[0],
         declaration
-    }))
+    }})
 }
 
 function extractBlocks(content: string): IBlock[] {
