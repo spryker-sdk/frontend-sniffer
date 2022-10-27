@@ -135,13 +135,11 @@ function matchAll(input: string, regex: RegExp): RegExpExecArray[] {
 
 function extractDefinitions(content: string): IDefinition[] {
     const declarations = content.match(defineDeclarationRegex) || [];
-    return declarations.map((declaration: string) => {
-        // console.log(declaration.match(defineContractRegex)[0]);
-        return {
+    return declarations.map((declaration: string) => ({
         name: declaration.match(defineNameRegex)[0],
         contract: declaration.match(defineContractRegex)[0],
         declaration
-    }})
+    }))
 }
 
 function extractBlocks(content: string): IBlock[] {
