@@ -45,10 +45,10 @@ const allowedDefinitions = [
     'attributes'
 ];
 
-const contentRegex = /(\{|\}|\.|\n|\w|:|~|\s|t|,|\[|\]|\||\(|\)|\?|(('|"|\{#).*('|"|#\}))|)+/;
 const defineNameRegex = new RegExp(`(?<=\\{%\\s+define\\s+)(${allowedDefinitions.join('|')})`, 'i');
 const defineOpeningTagRegex = new RegExp(`\\{%\\s+define\\s+(${allowedDefinitions.join('|')})\\s+=\\s+\\{`);
 const defineClosingTagRegex = /\}\s*%\}/;
+const contentRegex =  new RegExp(`\\n?(.\\n?(?!${defineClosingTagRegex.source}))+(\\n|\\s)?`);
 const defineDeclarationRegex = new RegExp(`${defineOpeningTagRegex.source}${contentRegex.source}${defineClosingTagRegex.source}`, 'gmi');
 const defineContractRegex = new RegExp(`(?<=${defineOpeningTagRegex.source})${contentRegex.source}(?=${defineClosingTagRegex.source})`, 'gmi');
 

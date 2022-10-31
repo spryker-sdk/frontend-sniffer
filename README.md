@@ -10,14 +10,13 @@ technologies to better understand how the sniffer works.
 - [RxJs](https://rxjs.dev/)
 
 ## Setup
-**Note**: prefer `yarn` over `npm` when working on this project.
 
 ```bash
-1. yarn install
-2. yarn build
+1. npm install
+2. npm run build
 # Turn on with watcher
-3. yarn watch
-4. yarn sniff - to run sniffer inside your project (Need to set up current path inside bin/frontend-sniffer or use "-p [absolute project path]" option)
+3. npm run watch
+4. npm run sniff - to run sniffer inside your project (Need to set up current path inside bin/frontend-sniffer or use "-p [absolute project path]" option)
 ```
 
 ## Configuration
@@ -50,7 +49,7 @@ Options:
 
 Example:
 Run sniffer for 3 components core level only for the next path '/Users/userName/Projects/suite-nonsplit/project' in debug mode
-yarn sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
+npm run sniff -p /Users/userName/Projects/suite-nonsplit/project -o 3 -l core -d
 ```
 
 ## Programmatic usage (API)
