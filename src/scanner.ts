@@ -1,6 +1,6 @@
 import { isAbsolute, join } from 'path';
 import { async as fastGlob, Options } from 'fast-glob'
-import { EntryItem } from 'fast-glob/out/types/entries'
+import { EntryItem } from 'fast-glob/out/types'
 import { from, merge, of, Observable } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 import { environment } from './environment';

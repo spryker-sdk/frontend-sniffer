@@ -100,7 +100,7 @@ function extractArgument(declarationNode: any) {
     const valueNode = find(declarationNode, { type: 'value' });
 
     return {
-        name: nameNode.value,
+        name: (nameNode as any).value,
         value: extractValue(valueNode)
     }
 }
@@ -159,7 +159,7 @@ function extractEmptyArgument(variableNode: any) {
     const nameNode = find(variableNode, { type: 'ident' });
 
     return {
-        name: nameNode.value,
+        name: (nameNode as any).value,
         value: null
     }
 }
@@ -306,8 +306,8 @@ function extractBlockModifiers(stylesheetNode: any) {
             return;
         }
 
-        const isModifier = /^--/.test(nameNode.value);
-        const name = nameNode
+        const isModifier = /^--/.test((nameNode as any).value);
+        const name = (nameNode as any)
             .value
             .replace(/^--/, '');
 
