@@ -96,11 +96,11 @@ function extractVariable(declarationNode: any, parentNode: any) {
 
 function extractArgument(declarationNode: any) {
     const variableNode = find(declarationNode, { type: 'variable' });
-    const nameNode = find(variableNode, { type: 'ident' });
+    const nameNode = find(variableNode, { type: 'ident' }) as any;
     const valueNode = find(declarationNode, { type: 'value' });
 
     return {
-        name: (nameNode as any).value,
+        name: nameNode.value,
         value: extractValue(valueNode)
     }
 }
@@ -156,10 +156,10 @@ function extractValue(valueNode) {
 }
 
 function extractEmptyArgument(variableNode: any) {
-    const nameNode = find(variableNode, { type: 'ident' });
+    const nameNode = find(variableNode, { type: 'ident' }) as any;
 
     return {
-        name: (nameNode as any).value,
+        name: nameNode.value,
         value: null
     }
 }
@@ -300,14 +300,14 @@ function extractBlockModifiers(stylesheetNode: any) {
     const modifierMap = new Map<string, any>();
 
     visitParents(stylesheetNode, 'selector', (selectorNode, ancestorNodes) => {
-        const nameNode = find(selectorNode, { type: 'ident' });
+        const nameNode = find(selectorNode, { type: 'ident' }) as any;
 
         if (!nameNode) {
             return;
         }
 
-        const isModifier = /^--/.test((nameNode as any).value);
-        const name = (nameNode as any)
+        const isModifier = /^--/.test(nameNode.value);
+        const name = nameNode
             .value
             .replace(/^--/, '');
 
