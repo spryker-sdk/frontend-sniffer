@@ -176,14 +176,14 @@ function createTypeString(node: ts.TypeNode, extractAsync: boolean = false): str
 function createTag(node: ts.JSDocTag): ITag {
     return {
         name: node.tagName.text,
-        description: node.comment || null
+        description: node.comment as string || null
     };
 }
 
 function createParameter(node: ts.ParameterDeclaration, jsDocNode: ts.JSDocParameterTag = null): IParameter {
     return {
         name: node.name.getText(),
-        description: !!jsDocNode ? jsDocNode.comment || null : null,
+        description: !!jsDocNode ? jsDocNode.comment as string || null : null,
         type: createTypeString(node.type),
         isOptional: isParameterOptional(node)
     };
@@ -381,7 +381,7 @@ function extractDescription(node: ts.Node): string {
         return null;
     }
 
-    return commentNode.comment || null;
+    return commentNode.comment as string || null;
 }
 
 export const parse: TParser<ITypescriptExternalApi, ITypescriptInternalApi> = async (file: string): Promise<IParserOutput<ITypescriptExternalApi, ITypescriptInternalApi>> => {

@@ -1,6 +1,6 @@
 {
     "name": "@spryker/frontend-sniffer",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "main": "index.js",
     "license": "SEE LICENSE IN LICENSE FILE",
     "bin": {
@@ -27,7 +27,7 @@
         "rxjs": "^7.4.0",
         "sast": "^0.8.1",
         "showdown": "^2.1.0",
-        "typescript": "~4.2.4",
+        "typescript": "~4.9.5",
         "unist-util-find": "^1.0.4",
         "unist-util-find-before": "^2.0.5",
         "unist-util-is": "^2.1.3",
