@@ -1,12 +1,12 @@
 {
     "name": "@spryker/frontend-sniffer",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "lockfileVersion": 2,
     "requires": true,
     "packages": {
         "": {
             "name": "@spryker/frontend-sniffer",
-            "version": "0.2.6",
+            "version": "0.2.7",
             "hasInstallScript": true,
             "license": "SEE LICENSE IN LICENSE FILE",
             "dependencies": {
